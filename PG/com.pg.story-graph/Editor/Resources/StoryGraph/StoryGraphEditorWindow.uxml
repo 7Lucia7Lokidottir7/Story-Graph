@@ -1,0 +1,30 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="project://database/Assets/Plugins/Dialouge%20Graph/Editor/Resources/PG%20DialougeGraph/DialougeGraphEditorWindowStyle.uss?fileID=7433441132597879392&amp;guid=3fac632ea5553014294d6568502262f8&amp;type=3#DialougeGraphEditorWindowStyle" />
+    <uie:Toolbar>
+        <uie:ToolbarMenu text="Assets" parse-escape-sequences="false" name="AssetsMenu" />
+        <uie:ToolbarButton text="Center&#10;" name="CenterButton" style="width: 91px;" />
+        <ui:Slider label="Zoom" value="0.5" high-value="1.25" low-value="0.1" fill="true" page-size="0" show-input-field="true" name="Zoom">
+            <uie:ToolbarSpacer />
+        </ui:Slider>
+        <uie:ToolbarSpacer style="width: 11px;" />
+        <uie:ToolbarButton text="Base Layer" name="BaseLayerButton" />
+        <uie:ToolbarBreadcrumbs name="ToolbarBreadcrumbs" style="width: 233px;" />
+        <uie:ToolbarSpacer style="width: 33px;" />
+    </uie:Toolbar>
+    <StorySplitView fixed-pane-initial-dimension="225">
+        <ui:VisualElement name="left-panel" style="flex-grow: 1;">
+            <ui:DropdownField choices="Inspector,Objects,Variables" index="0" name="data-dropdown" style="width: 204px; font-size: 12px; background-color: rgb(37, 37, 37);" />
+            <ui:ScrollView horizontal-scroller-visibility="Hidden" style="flex-grow: 1;">
+                <StoryInspectorView name="StoryInspectorView" style="padding-top: 5px; padding-right: 5px; padding-bottom: 5px; padding-left: 5px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0;" />
+            </ui:ScrollView>
+        </ui:VisualElement>
+        <ui:VisualElement name="right-panel" style="flex-grow: 1;">
+            <ui:Label text="Graph" style="color: rgb(210, 210, 210); height: 26px; background-color: rgb(37, 37, 37); padding-left: 6px;" />
+            <ui:VisualElement name="container-graph-view" style="flex-grow: 1;">
+                <StoryGraphView style="flex-grow: 1;">
+                    <ui:Button text="Back" name="back" selectable="false" style="position: absolute;" />
+                </StoryGraphView>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </StorySplitView>
+</ui:UXML>

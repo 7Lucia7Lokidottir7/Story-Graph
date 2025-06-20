@@ -1,0 +1,221 @@
+diff a/Scenario Graph/Assets/XReadyLab/com.xreadylab.scenario-graph/Editor/Graph/ScenarioGraphView.cs b/Scenario Graph/Assets/XReadyLab/com.xreadylab.scenario-graph/Editor/Graph/ScenarioGraphView.cs	(rejected hunks)
+@@ -26,11 +26,14 @@
+     public ScenarioGraph scenarioGraph => _scenarioGraph;
+     internal Action<NodeView> onNodeSelected;
+ 
+-    public GroupNode groupNode;
++    public BaseGroupNode currentGroupNode => _currentGroupNode;
+ 
+-    private int _currentClicks = 0;
++    private List<ScenarioNode> _temporaryNodes; // ��������� ������ ��� ��� �������� �����������
++    private BaseGroupNode _currentGroupNode; // ������� ������ (����)
+ 
++    private int _currentClicks = 0;
+ 
++    private bool _saveAssetsScheduled = false;
+     // ������ ��� �������� ������������� �����
+     private ClipboardNodes _clipboardNodes = new ClipboardNodes();
+ 
+@@ -115,7 +119,7 @@
+ 
+             // ��������� ����� ���� � AssetDatabase
+             AssetDatabase.AddObjectToAsset(newNode, scenarioGraph);
+-            if (newNode is GroupNode groupNode1)
++            if (newNode is BaseGroupNode groupNode1)
+             {
+                 CopyGroup(groupNode1);
+             }
+@@ -123,14 +127,8 @@
+ 
+             // ��������� ����� ���� � ����
+             Undo.RecordObject(scenarioGraph, "Scenario Graph (Copied Node)");
+-            if (groupNode != null)
+-            {
+-                groupNode.scenarioNodes.Add(newNode);
+-            }
+-            else
+-            {
+-                scenarioGraph.nodes.Add(newNode);
+-            }
++
++            _temporaryNodes.Add(newNode);
+ 
+             newNodes.Add(newNode); // ��������� ��� ����������� ���������
+         }
+@@ -174,7 +166,7 @@
+         }
+         return JsonUtility.ToJson(_clipboardNodes);
+     }
+-    void CopyGroup(GroupNode groupNode)
++    void CopyGroup(BaseGroupNode groupNode)
+     {
+         List<ScenarioNode> originalNodes = new List<ScenarioNode>(groupNode.scenarioNodes); // ��������� �������� ������
+         List<ScenarioNode> newNodes = new List<ScenarioNode>(); // ��� �������� ����� ������������� ���
+@@ -199,7 +191,7 @@
+             idMapping[oldId] = newId;
+ 
+             // ���� ���� � ��� ��������� ������, �������� CopyGroup ����������
+-            if (newNode is GroupNode childGroupNode)
++            if (newNode is BaseGroupNode childGroupNode)
+             {
+                 CopyGroup(childGroupNode);
+             }
+@@ -477,7 +456,6 @@
+             //Debug.Log("Zoom setup completed with new value.");
+         });
+ 
+-        // ��������� ��������� ������ ����
+         RegisterCallback<WheelEvent>((e) =>
+         {
+             float scrollDelta = e.delta.y > 0 ? -0.1f : 0.1f;  // ��������� ����� ��������� ��������, ���� �����������
+@@ -491,11 +469,44 @@
+     }
+     void BackToLayer(ScenarioGraph scenarioGraph)
+     {
+-        groupNode = null;
++        _currentGroupNode = null;
+ 
+         PopulateView(scenarioGraph);
+     }
++    // ����� ��� �������� ����� � ������������� ���������� ������ ���
++    public void LoadGraph(ScenarioGraph scenarioGraph, BaseGroupNode groupNode = null)
++    {
++        _scenarioGraph = scenarioGraph;
++        _currentGroupNode = groupNode;
++
++        if (_currentGroupNode == null)
++        {
++            // ������ � �������� �������
++            _temporaryNodes = new List<ScenarioNode>(_scenarioGraph.nodes);
+ 
++            if (_scenarioGraph.rootNode == null)
++            {
++                _scenarioGraph.rootNode = _scenarioGraph.CreateNode(typeof(RootNode), Vector2.zero) as RootNode;
++            }
++        }
++        else
++        {
++            // ������ � ��������� �����
++            _temporaryNodes = new List<ScenarioNode>(_currentGroupNode.scenarioNodes);
++
++
++            if (_currentGroupNode.rootNode == null)
++            {
++                _currentGroupNode.rootNode = _scenarioGraph.CreateNodeToGroup(typeof(RootNode), groupNode, Vector2.zero) as RootNode;
++            }
++            if (_currentGroupNode.returnNode == null)
++            {
++                _currentGroupNode.returnNode = _scenarioGraph.CreateNodeToGroup(typeof(ReturnNode), groupNode, Vector2.up * 280) as ReturnNode;
++            }
++        }
++        SaveChanges();
++        PopulateView(_scenarioGraph);
++    }
+     internal void PopulateView(ScenarioGraph scenarioGraph)
+     {
+         if (scenarioGraph != null)
+@@ -602,7 +578,7 @@
+                 // �������� �����
+                 if (elem is NodeView nodeView)
+                 {
+-                    if (nodeView.scenarioNode is GroupNode groupNode)
++                    if (nodeView.scenarioNode is BaseGroupNode groupNode)
+                     {
+                         _scenarioGraph.DeleteGroupNode(groupNode);
+                     }
+@@ -610,9 +586,7 @@
+                     {
+                         _scenarioGraph.DeleteNode(nodeView.scenarioNode, nodeView.groupNode);
+                     }
+-
+-                    // ������������� ���� ��� ���������
+-                    EditorUtility.SetDirty(_scenarioGraph);
++                    Debug.Log("Deleted Nodes");
+                 }
+ 
+                 // �������� ������ (�����)
+@@ -623,16 +597,10 @@
+ 
+                     parent?.UnConnectToOutputNode(edge);
+                     child?.UnConnectToInputNode(edge);
+-
+-                    EditorUtility.SetDirty(_scenarioGraph);
++                    Debug.Log("UnConnected Elements");
+                 }
++                EditorUtility.SetDirty(_scenarioGraph);
+             }
+-
+-            // ��������� ���������
+-            AssetDatabase.SaveAssets();
+-
+-            // ��������� �������������
+-            PopulateView(_scenarioGraph);
+         }
+ 
+         // �������� ����� �����
+@@ -645,12 +613,9 @@
+ 
+                 parent?.ConnectToOutputNode(edge);
+                 child?.ConnectToInputNode(edge);
+-
+-                EditorUtility.SetDirty(_scenarioGraph);
++                Debug.Log("Connected Elements");
+             }
+-
+-            // ��������� ���������
+-            AssetDatabase.SaveAssets();
++            EditorUtility.SetDirty(_scenarioGraph);
+         }
+ 
+         // ����������� ���������
+@@ -662,18 +627,46 @@
+                 {
+                     nodeView.scenarioNode.scenarioGraph = _scenarioGraph;
+ 
+-                    EditorUtility.SetDirty(_scenarioGraph);
++                    Debug.Log("Moved Elements(Node)");
+                 }
++                Debug.Log("Moved Elements");
+             }
+ 
+-            // ��������� ���������
+-            AssetDatabase.SaveAssets();
+-            PopulateView(_scenarioGraph);
+         }
+ 
++        PopulateView(_scenarioGraph);
++        // ��������� ���������� ������� ������ ���� ��� ��� �� �������������
++        if (!_saveAssetsScheduled)
++        {
++            _saveAssetsScheduled = true;
++            EditorApplication.delayCall += () =>
++            {
++                // ��������� ���������
++                SaveChanges();
++                _saveAssetsScheduled = false;
++            };
++        }
+         return graphViewChange;
+     }
++    // ����� ��� ���������� ��������� � �������� ����
++    public void SaveChanges()
++    {
++        if (_currentGroupNode == null)
++        {
++            // ��������� �������� ������ ���
++            _scenarioGraph.nodes = new List<ScenarioNode>(_temporaryNodes);
++        }
++        else
++        {
++            // ��������� ������ ��� � ������� ������
++            _currentGroupNode.scenarioNodes = new List<ScenarioNode>(_temporaryNodes);
++        }
+ 
++        // �������� ������ ��� ���������� � ���������
++        EditorUtility.SetDirty(_scenarioGraph);
++        AssetDatabase.SaveAssets();
++        Debug.Log("Save Changes");
++    }
+ 
+     public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
+     {

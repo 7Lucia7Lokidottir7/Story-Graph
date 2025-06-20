@@ -1,0 +1,212 @@
+#node-border {
+    background-color: rgb(56, 56, 56);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-left-color: rgba(26, 26, 26, 0.95);
+    border-right-color: rgba(26, 26, 26, 0.95);
+    border-top-color: rgba(26, 26, 26, 0.95);
+    border-bottom-color: rgba(26, 26, 26, 0.95);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+    rotate: 0;
+}
+
+#input {
+    align-items: center;
+    position: absolute;
+    top: -25px;
+    -unity-text-align: upper-left;
+    align-self: center;
+    flex-direction: row;
+}
+
+#output {
+    align-items: center;
+    left: auto;
+    right: auto;
+    top: auto;
+    flex-direction: row;
+    justify-content: center;
+}
+
+.node {
+    min-width: 150px;
+    max-width: 300px;
+}
+
+#selection-border {
+    border-left-color: rgb(0, 127, 255);
+    border-right-color: rgb(0, 127, 255);
+    border-top-color: rgb(0, 127, 255);
+    border-bottom-color: rgb(0, 127, 255);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+:hover > #selection-border {
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+}
+
+:selected > #selection-border {
+    border-top-width: 2px;
+    border-right-width: 2px;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+    border-left-color: rgb(94, 180, 255);
+    border-right-color: rgb(94, 180, 255);
+    border-top-color: rgb(94, 180, 255);
+    border-bottom-color: rgb(94, 180, 255);
+}
+
+#title {
+    font-size: 14px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    padding-top: 5px;
+    -unity-text-outline-width: 0;
+    -unity-text-outline-color: rgba(0, 0, 0, 0.25);
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+#divider {
+    height: 25px;
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+    background-color: rgb(120, 49, 49);
+}
+
+#top > #divider {
+    background-color: rgb(130, 130, 130);
+    height: 2px;
+}
+
+.root #divider {
+    background-color: rgb(201, 201, 201);
+}
+
+.wait #divider {
+    background-color: rgb(54, 70, 99);
+}
+
+.activate-object #divider {
+    background-color: rgb(64, 116, 68);
+}
+
+#description {
+    -unity-font-style: italic;
+    padding-right: 10px;
+    padding-left: 10px;
+    max-width: 450px;
+    min-width: 100px;
+}
+
+.load-level #divider {
+    background-color: rgb(94, 43, 103);
+}
+
+.group #divider {
+    background-color: rgb(154, 117, 69);
+}
+
+.audio #divider {
+    background-color: rgb(204, 165, 81);
+}
+
+.running {
+    border-top-width: 4px;
+    border-right-width: 4px;
+    border-bottom-width: 4px;
+    border-left-width: 4px;
+    border-left-color: rgb(255, 255, 255);
+    border-right-color: rgb(255, 255, 255);
+    border-top-color: rgb(255, 255, 255);
+    border-bottom-color: rgb(255, 255, 255);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+}
+
+.merge #divider {
+    background-color: rgb(52, 103, 89);
+}
+
+.notepad #divider {
+    background-color: rgb(255, 225, 169);
+}
+
+.interact #divider {
+    background-color: rgb(134, 80, 26);
+}
+
+.hints #divider {
+    background-color: rgb(153, 94, 149);
+}
+
+.variable #divider {
+    background-color: rgb(129, 143, 96);
+}
+
+.condition #divider {
+    background-color: rgb(126, 136, 39);
+}
+
+.complete {
+    border-top-width: 6px;
+    border-right-width: 6px;
+    border-bottom-width: 6px;
+    border-left-width: 6px;
+    border-left-color: rgb(57, 255, 102);
+    border-right-color: rgb(57, 255, 102);
+    border-top-color: rgb(57, 255, 102);
+    border-bottom-color: rgb(57, 255, 102);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+}
+
+.transform #divider {
+    background-color: rgb(57, 67, 101);
+}
+
+.physics #divider {
+    background-color: rgb(118, 50, 71);
+}
+
+.sequence #divider {
+    background-color: rgb(96, 21, 21);
+}
+
+.separator #divider {
+    background-color: rgba(96, 21, 21, 0);
+}
+
+.navigation #divider {
+    background-color: rgb(88, 96, 21);
+}
+
+.tablet #divider {
+    background-color: rgb(96, 21, 58);
+}

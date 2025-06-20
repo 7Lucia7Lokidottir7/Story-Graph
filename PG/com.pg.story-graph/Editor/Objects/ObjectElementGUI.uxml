@@ -1,0 +1,11 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <uie:ObjectField label="Graph" binding-path="graph" type="PG.StorySystem.StoryGraph, Assembly-CSharp" data-source-type="PG.StorySystem.StoryGraph, Assembly-CSharp" />
+    <ui:Label text="Object" name="Label" />
+    <SearchableDropdownField focusable="false" name="Object" style="height: 18px;" />
+    <ui:Foldout text="Create Object" value="false">
+        <ui:TextField label="Object name" placeholder-text="Name" name="NameObject" />
+        <ui:Toggle label="Clear Text After Create" name="ClearTextAfterCreateToggle" />
+        <ui:Toggle label="Apply Name Objec tTo This Object" name="ApplyNameObjectToThisObjectToggle" />
+        <ui:Button text="Create" name="CreateButton" />
+    </ui:Foldout>
+</ui:UXML>

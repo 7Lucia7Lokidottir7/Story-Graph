@@ -1,0 +1,8 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Assets/Story%20Graph/Editor/Resources/StoryGraph/StoryGraphEditorWindowStyle.uss?fileID=7433441132597879392&amp;guid=3fac632ea5553014294d6568502262f8&amp;type=3#StoryGraphEditorWindowStyle" />
+    <engine:Foldout text="Foldout" style="background-color: rgb(64, 64, 64); border-top-left-radius: 10px; border-top-right-radius: 10px; border-bottom-right-radius: 10px; border-bottom-left-radius: 10px; border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-left-color: rgba(0, 0, 0, 0.5); border-right-color: rgba(0, 0, 0, 0.5); border-top-color: rgba(0, 0, 0, 0.5); border-bottom-color: rgba(0, 0, 0, 0.5); padding-bottom: 5px; padding-top: 2.5px; margin-bottom: 7.5px;">
+        <engine:TextField label="Name" placeholder-text="filler text" name="NameField" binding-path="variableName" style="flex-shrink: 1; flex-direction: column;" />
+        <engine:FloatField label="Value" value="0" binding-path="floatValue" style="flex-shrink: 1; flex-direction: column;" />
+        <engine:Button text="X" name="CloseButton" style="width: 25px;" />
+    </engine:Foldout>
+</engine:UXML>

@@ -1,0 +1,31 @@
+<UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="True">
+    <Style src="project://database/Assets/PG/com.pg.story-graph/Editor/Resources/StoryGraph/NodeViewStyle.uss?fileID=7433441132597879392&amp;guid=d81c0aa658a2ce24595663cb320e961c&amp;type=3#NodeViewStyle" />
+    <ui:VisualElement name="node-border">
+        <ui:VisualElement name="contents">
+            <ui:VisualElement name="divider" class="horizontal" />
+            <ui:VisualElement name="top">
+                <ui:VisualElement name="input" />
+                <ui:VisualElement name="divider" class="vertical" />
+                <ui:VisualElement name="title">
+                    <ui:Label name="title-label" text="AnimationNode" class="unity-text-element unity-label" />
+                    <ui:Label name="nameNode-label" text="Name Node" class="unity-text-element unity-label" style="font-size: 12px; -unity-font-style: bold;" />
+                    <ui:VisualElement name="title-button-container">
+                        <ui:VisualElement name="collapse-button">
+                            <ui:VisualElement name="icon" />
+                        </ui:VisualElement>
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:Label text="This is description" name="description" style="white-space: normal;" />
+                <ui:VisualElement name="sub-container" style="flex-grow: 1; flex-direction: column;" />
+                <ui:VisualElement name="variable-container" style="flex-grow: 1; flex-direction: row; justify-content: space-between;">
+                    <ui:VisualElement name="variable-input" style="flex-grow: 1; align-items: flex-start; align-self: flex-start; justify-content: center;" />
+                    <ui:VisualElement name="variable-output" style="flex-grow: 1; align-self: center; align-items: flex-end; align-content: flex-start; flex-direction: column; -unity-text-align: upper-left; justify-content: center;" />
+                </ui:VisualElement>
+                <ui:VisualElement name="events-container" style="flex-grow: 1;" />
+                <ui:VisualElement name="button-container" style="flex-grow: 1;" />
+                <ui:VisualElement name="output" />
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+    <ui:VisualElement name="selection-border" tabindex="0" enabled="true" picking-mode="Ignore" />
+</UXML>
