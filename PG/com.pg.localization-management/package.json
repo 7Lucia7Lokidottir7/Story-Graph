@@ -1,8 +1,0 @@
-{
-  "name": "com.pg.localization-management",
-  "version": "1.3.0",
-  "displayName": "Localization System",
-  "description": "Localization System. The very best asset for creation animations with code",
-  "unity": "2022.3",
-  "type": "plugin"
-}

@@ -1,0 +1,196 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-5533846575323496895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0903771343a37854aa5b2c0db0976af2, type: 3}
+  m_Name: BranchNode
+  m_EditorClassIdentifier: 
+  isVisibleInTemplate: 0
+  id: 6
+  guid: 26fec3ae2cdfaad4abbccfcf38ccd863
+  nodePosition: {x: 59.77362, y: 451.92453}
+  storyGraph: {fileID: 11400000}
+  nameNode: 
+  childrenID: 
+  description: 
+  storyVariableNameID: 
+  storyVariable2NameID: 
+  conditionID: 7
+  falseChildrenID: 
+--- !u!114 &-2630917673976931007
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c49f7fb40280ffb42a428a215d1ff37a, type: 3}
+  m_Name: AnimationNode
+  m_EditorClassIdentifier: 
+  isVisibleInTemplate: 0
+  id: 4
+  guid: 2dde4e40b3572ee43a4bb2f2cf63620a
+  nodePosition: {x: 51.62262, y: 256.243}
+  storyGraph: {fileID: 11400000}
+  nameNode: 
+  childrenID: 05000000
+  description: 
+  objectNameID: 
+  parameter: 
+  parameterType: 0
+  floatValue: 0
+  intValue: 0
+  boolValue: 0
+  _waitEndAnimation: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dca4fd47846ca744c993b8dea9eabb30, type: 3}
+  m_Name: New Story Graph
+  m_EditorClassIdentifier: 
+  rootNode: {fileID: 1815910538546616875}
+  nodes:
+  - {fileID: 1815910538546616875}
+  - {fileID: 8144263090826788072}
+  - {fileID: 4416672758970891969}
+  - {fileID: -2630917673976931007}
+  - {fileID: 3527077816008519805}
+  - {fileID: -5533846575323496895}
+  - {fileID: 4782261317501857250}
+  nextId: 8
+  nodesID: 
+  currentNodes: []
+  runner: {fileID: 0}
+  objects: []
+  variables: []
+--- !u!114 &1815910538546616875
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cddb2d84f354cc543bd2c59f990870e7, type: 3}
+  m_Name: RootNode
+  m_EditorClassIdentifier: 
+  isVisibleInTemplate: 0
+  id: 1
+  guid: b66a15698b35b164c9bbaa920ca1a176
+  nodePosition: {x: 83.3208, y: -36.778854}
+  storyGraph: {fileID: 11400000}
+  nameNode: 
+  childrenID: 03000000
+  description: 
+--- !u!114 &3527077816008519805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c49f7fb40280ffb42a428a215d1ff37a, type: 3}
+  m_Name: AnimationNode(Clone)(Clone)
+  m_EditorClassIdentifier: 
+  isVisibleInTemplate: 0
+  id: 5
+  guid: 62bdc9632bbc8644c97dc4ef5a5b1db4
+  nodePosition: {x: 59.77359, y: 362.5132}
+  storyGraph: {fileID: 11400000}
+  nameNode: 
+  childrenID: 06000000
+  description: 
+  objectNameID: 
+  parameter: 
+  parameterType: 0
+  floatValue: 0
+  intValue: 0
+  boolValue: 0
+  _waitEndAnimation: 0
+--- !u!114 &4416672758970891969
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec7e5426f3b2d8547a8780d6859aad2f, type: 3}
+  m_Name: WaitInSecondsNode
+  m_EditorClassIdentifier: 
+  isVisibleInTemplate: 0
+  id: 3
+  guid: 092620c06c96acd4fb4a381ac72de54f
+  nodePosition: {x: 56.150944, y: 147.9148}
+  storyGraph: {fileID: 11400000}
+  nameNode: 
+  childrenID: 04000000
+  description: 
+  _duration: 1
+--- !u!114 &4782261317501857250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74f2eaa664d00424e818a94f38131abd, type: 3}
+  m_Name: CheckDistanceObjectsConditionNode
+  m_EditorClassIdentifier: 
+  isVisibleInTemplate: 0
+  id: 7
+  guid: d6a61d5728b85304290f35e7da774623
+  nodePosition: {x: -230.03786, y: 451.92453}
+  storyGraph: {fileID: 11400000}
+  nameNode: 
+  childrenID: 
+  description: 
+  storyVariableNameID: 
+  storyVariable2NameID: 
+  objectNameID: 
+  targetObjectNameID: 
+  targetVector: {x: 0, y: 0, z: 0}
+  _targetDistance: 0
+  _checkType: 0
+  useTargetObject: 0
+--- !u!114 &8144263090826788072
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e666fcf1cf98fa44b8a42bb1ed191fb, type: 3}
+  m_Name: NotepadNode
+  m_EditorClassIdentifier: 
+  isVisibleInTemplate: 0
+  id: 2
+  guid: ebb7f06c5d7faba46bfb27d2d7734460
+  nodePosition: {x: 335.5721, y: 207.39626}
+  storyGraph: {fileID: 11400000}
+  nameNode: 
+  childrenID: 
+  description: 

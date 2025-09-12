@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: cc1d1254f21c4f944b52f6848b8b36c0
+timeCreated: 1512843006
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 15606
+  packageName: Sci-fi GUI skin
+  packageVersion: 1.2
+  assetPath: Assets/Sci-Fi UI/Demo_Assets/scripts/GUI_Demo.cs
+  uploadId: 217544
