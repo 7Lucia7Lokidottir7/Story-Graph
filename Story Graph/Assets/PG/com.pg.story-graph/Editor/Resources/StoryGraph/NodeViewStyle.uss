@@ -87,7 +87,7 @@
     padding-left: 10px;
 }
 
-#divider {
+#divider-style {
     height: 25px;
     border-left-color: rgba(0, 0, 0, 0);
     border-right-color: rgba(0, 0, 0, 0);
@@ -101,15 +101,15 @@
     height: 2px;
 }
 
-.root #divider {
+.root #divider-style {
     background-color: rgb(201, 201, 201);
 }
 
-.wait #divider {
+.wait #divider-style {
     background-color: rgb(54, 70, 99);
 }
 
-.activate-object #divider {
+.activate-object #divider-style {
     background-color: rgb(64, 116, 68);
 }
 
@@ -121,15 +121,15 @@
     min-width: 100px;
 }
 
-.load-level #divider {
+.load-level #divider-style {
     background-color: rgb(94, 43, 103);
 }
 
-.group #divider {
+.group #divider-style {
     background-color: rgb(154, 117, 69);
 }
 
-.audio #divider {
+.audio #divider-style {
     background-color: rgb(204, 165, 81);
 }
 
@@ -148,27 +148,27 @@
     border-bottom-left-radius: 15px;
 }
 
-.merge #divider {
+.merge #divider-style {
     background-color: rgb(52, 103, 89);
 }
 
-.notepad #divider {
+.notepad #divider-style {
     background-color: rgb(255, 225, 169);
 }
 
-.interact #divider {
+.interact #divider-style {
     background-color: rgb(134, 80, 26);
 }
 
-.hints #divider {
+.hints #divider-style {
     background-color: rgb(153, 94, 149);
 }
 
-.variable #divider {
+.variable #divider-style {
     background-color: rgb(129, 143, 96);
 }
 
-.condition #divider {
+.condition #divider-style {
     background-color: rgb(126, 136, 39);
 }
 
@@ -187,26 +187,26 @@
     border-bottom-left-radius: 15px;
 }
 
-.transform #divider {
+.transform #divider-style {
     background-color: rgb(57, 67, 101);
 }
 
-.physics #divider {
+.physics #divider-style {
     background-color: rgb(118, 50, 71);
 }
 
-.sequence #divider {
+.sequence #divider-style {
     background-color: rgb(96, 21, 21);
 }
 
-.separator #divider {
+.separator #divider-style {
     background-color: rgba(96, 21, 21, 0);
 }
 
-.navigation #divider {
+.navigation #divider-style {
     background-color: rgb(88, 96, 21);
 }
 
-.tablet #divider {
+.tablet #divider-style {
     background-color: rgb(96, 21, 58);
 }

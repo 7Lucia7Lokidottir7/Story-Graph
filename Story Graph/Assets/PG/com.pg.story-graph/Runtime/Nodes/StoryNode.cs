@@ -5,6 +5,7 @@ namespace PG.StorySystem.Nodes
 {
     public abstract class StoryNode : ScriptableObject
     {
+        public virtual Color colorNode => Color.clear;
         public virtual bool reinitNodeOnStart => true;
 
         [HideInInspector] public bool isVisibleInTemplate;

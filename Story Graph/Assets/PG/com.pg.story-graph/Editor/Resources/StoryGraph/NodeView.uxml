@@ -1,8 +1,8 @@
 <UXML xmlns:ui="UnityEngine.UIElements" editor-extension-mode="True">
-    <Style src="project://database/Assets/Story%20Graph/Editor/Resources/StoryGraph/NodeViewStyle.uss?fileID=7433441132597879392&amp;guid=985b4fff5f0cb4c45965647a3ad7c8a0&amp;type=3#NodeViewStyle" />
+    <Style src="project://database/Assets/PG/com.pg.story-graph/Editor/Resources/StoryGraph/NodeViewStyle.uss?fileID=7433441132597879392&amp;guid=985b4fff5f0cb4c45965647a3ad7c8a0&amp;type=3#NodeViewStyle" />
     <ui:VisualElement name="node-border">
         <ui:VisualElement name="contents">
-            <ui:VisualElement name="divider" class="horizontal" />
+            <ui:VisualElement name="divider-style" class="horizontal" />
             <ui:VisualElement name="top">
                 <ui:VisualElement name="input" />
                 <ui:VisualElement name="divider" class="vertical" />

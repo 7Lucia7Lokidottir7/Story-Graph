@@ -44,6 +44,10 @@ namespace PG.StorySystem
             //title = node.GetName() + " " + GetType().Name;
             guid = node.guid;
             viewDataKey = guid;
+            if (storyNode.colorNode != Color.clear)
+            {
+                this.Q<VisualElement>("divider-style").style.backgroundColor = storyNode.colorNode;
+            }
             _descriptionLabel = this.Q<Label>("description");
             _descriptionLabel.text = node.description;
             _nameNodeLabel = this.Q<Label>("nameNode-label");
