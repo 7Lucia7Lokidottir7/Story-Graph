@@ -1,7 +1,7 @@
 {
   "name": "com.pg.story-graph",
-  "version": "2.0.1",
-  "displayName": "XReadyLab Story Graph",
+  "version": "2.0.2",
+  "displayName": "PG Story Graph",
   "description": "Story Graph. A package for creating XR applications without code. It is an updated replacement for StorySystem. It is recommended to work with Unity 2022, Unity 6 and newer.",
   "unity": "2022.3",
   "type": "plugin",
@@ -20,11 +20,7 @@
     },
     {
       "displayName": "XR",
-      "path": "Samples~/XR",
-      "dependencies": {
-        "com.unity.xr.interaction.toolkit": "3.0.8",
-        "com.unity.xr.management": "4.5.1"
-      }
+      "path": "Samples~/XR"
     }
   ]
 }
