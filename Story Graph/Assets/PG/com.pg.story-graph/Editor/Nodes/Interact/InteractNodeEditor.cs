@@ -7,7 +7,7 @@ namespace PG.StorySystem.NodesEditor
     using UnityEditor.UIElements;
     using UnityEngine.UIElements;
     [CustomEditor(typeof(InteractNode), true)]
-    internal class InteractNodeEditor : StoryNodeEditor
+    public class InteractNodeEditor : StoryNodeEditor
     {
         private InteractNode _interactNode;
         protected override void Init()

@@ -14,7 +14,6 @@ namespace PG.StorySystem.Nodes
             base.OnStart(storyGraph);
             if (!_scene.isLoaded)
             {
-                VREffectSceneLoader.instance.StartLoad();
                 SceneManager.LoadSceneAsync(levelName, LoadSceneMode.Additive).completed += operation =>
                 {
                     _scene = SceneManager.GetSceneByName(levelName);
@@ -28,17 +27,8 @@ namespace PG.StorySystem.Nodes
         protected override void OnEnd(StoryGraph storyGraph)
         {
             base.OnEnd(storyGraph);
-            storyGraph.StartCoroutine(UnloadingLevel());
-
-        }
-        IEnumerator UnloadingLevel()
-        {
-            if (VREffectSceneLoader.instance != null)
-            {
-                VREffectSceneLoader.instance.StartUnload();
-                yield return new WaitForSeconds(VREffectSceneLoader.instance.duration);
-            }
             SceneManager.UnloadSceneAsync(_scene);
+
         }
     }
 }

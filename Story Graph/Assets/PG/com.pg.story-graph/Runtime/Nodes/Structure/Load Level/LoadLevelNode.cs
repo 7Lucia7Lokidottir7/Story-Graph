@@ -19,15 +19,9 @@ namespace PG.StorySystem.Nodes
         {
             if (!SceneManager.GetSceneByName(_levelName).isLoaded)
             {
-                if (VREffectSceneLoader.instance != null)
-                {
-                    VREffectSceneLoader.instance.StartUnload();
-                    yield return new WaitForSeconds(VREffectSceneLoader.instance.duration);
-                }
                 AsyncOperation operation = SceneManager.LoadSceneAsync(_levelName, _isAdditiveLoad ? LoadSceneMode.Additive : LoadSceneMode.Single);
                 yield return new WaitUntil(() => operation.isDone);
 
-                VREffectSceneLoader.instance.StartLoad();
                 if (_setActiveScene)
                 {
                     SceneManager.SetActiveScene(SceneManager.GetSceneByName(_levelName));

@@ -17,11 +17,6 @@ namespace PG.StorySystem.Nodes
         {
             if (SceneManager.GetSceneByName(_levelName).isLoaded)
             {
-                if (VREffectSceneLoader.instance != null)
-                {
-                    VREffectSceneLoader.instance.StartUnload();
-                    yield return new WaitForSeconds(VREffectSceneLoader.instance.duration);
-                }
                 AsyncOperation operation = SceneManager.UnloadSceneAsync(_levelName, UnloadSceneOptions.UnloadAllEmbeddedSceneObjects);
                 yield return new WaitUntil(() => operation.isDone);
 
