@@ -6,11 +6,8 @@
   "unity": "2022.3",
   "type": "plugin",
   "dependencies": {
-    "com.xreadylab.localization-management": "1.3.0",
     "com.unity.xr.interaction.toolkit": "3.0.8",
     "com.unity.xr.management": "4.5.1",
-    "com.xreadylab.procedural-image": "1.0.0",
-    "com.unity.addressables": "2.4.3"
   },
   "publishConfig": {
     "registry": "https://registry.xreadylab.com"

@@ -12,6 +12,7 @@ using UnityEditor.UIElements;
 using System.Threading.Tasks;
 using UnityEngine.Profiling;
 
+
 //For Unity 6 and later
 #if UNITY_6000_0_OR_NEWER
 [UxmlElement]
@@ -94,7 +95,6 @@ public sealed partial class StoryGraphView : GraphView
         unserializeAndPaste += PasteOperation;
 
         this.RegisterCallback<MouseDownEvent>(OnMouseDown, TrickleDown.TrickleDown);
-
     }
     #region Copy, Paste and Dublicate
     private void PasteOperation(string operationName, string data)
