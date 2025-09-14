@@ -1,15 +1,16 @@
-﻿using UnityEngine;
-
-namespace PG.StorySystem.Nodes
+﻿namespace PG.StorySystem.Nodes
 {
     public class OrMergeNode : MergeNode
     {
-        private bool _isStarted;
-
+        public bool isFinished;
+        protected override void Init(StoryGraph storyGraph)
+        {
+            isFinished = false;
+        }
         public override void RestartNode(StoryGraph storyGraph)
         {
-            _isStarted = false;
             base.RestartNode(storyGraph);
+            isFinished = false;
         }
 
         protected override void OnUpdate(StoryGraph storyGraph)
@@ -22,24 +23,11 @@ namespace PG.StorySystem.Nodes
 
         protected override void OnStart(StoryGraph storyGraph)
         {
-            TryTransition(storyGraph);
-        }
-
-        /// <summary>
-        /// Переход на следующий узел выполняется только один раз.
-        /// </summary>
-        public override void TransitionToNextNodes(StoryGraph storyGraph)
-        {
-            if (!isEnded && !_isStarted)
+            if (isFinished)
             {
-                _isStarted = true;
-                base.TransitionToNextNodes(storyGraph);
+                return;
             }
-        }
-
-        private void TryTransition(StoryGraph storyGraph)
-        {
-            // Вызываем OnTransitionToNextNode, условие уже проверяется в данном методе.
+            isFinished = true;
             TransitionToNextNodes(storyGraph);
         }
     }
