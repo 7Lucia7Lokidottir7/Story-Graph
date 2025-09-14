@@ -105,5 +105,28 @@ namespace PG.StorySystem.Nodes
             return null;
         }
 
+        public StoryNode FindNode(int idNode)
+        {
+            for (int i = 0; i < storyNodes.Count; i++)
+            {
+                if (storyNodes[i].id == idNode)
+                {
+                    return storyNodes[i];
+                }
+
+                if (storyNodes[i] is BaseGroupNode groupNode)
+                {
+                    var foundNode = groupNode.FindNode(idNode);
+                    if (foundNode != null)
+                    {
+                        return foundNode;
+                    }
+                }
+            }
+
+            Debug.LogWarning($"Node with name '{nameNode}' not found in the graph.");
+            return null;
+        }
+
     }
 }

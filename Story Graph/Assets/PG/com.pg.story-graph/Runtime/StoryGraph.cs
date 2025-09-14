@@ -265,6 +265,29 @@ namespace PG.StorySystem
             Debug.LogWarning($"Node with name '{nameNode}' not found in the graph.");
             return null;
         }
+
+        public StoryNode FindNode(int idNode)
+        {
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                if (nodes[i].id == idNode)
+                {
+                    return nodes[i];
+                }
+
+                if (nodes[i] is BaseGroupNode groupNode)
+                {
+                    var foundNode = groupNode.FindNode(idNode);
+                    if (foundNode != null)
+                    {
+                        return foundNode;
+                    }
+                }
+            }
+
+            Debug.LogWarning($"Node with id '{idNode}' not found in the graph.");
+            return null;
+        }
         #endregion
     }
 }
