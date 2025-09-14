@@ -5,6 +5,7 @@ namespace PG.StorySystem.Nodes
 {
     public class PlayCutsceneNode : ActionNode
     {
+        public override Color colorNode => Color.rebeccaPurple;
         private PlayableDirector _playableDirector;
         [SerializeField] private PlayableAsset _asset;
         [SerializeField] private bool _isWaitEndTimeline;

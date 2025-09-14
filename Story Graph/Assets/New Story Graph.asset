@@ -51,6 +51,26 @@ MonoBehaviour:
   intValue: 0
   boolValue: 0
   _waitEndAnimation: 0
+--- !u!114 &-495324616407804580
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 495b7ce4827cba248b2d5b20548e4124, type: 3}
+  m_Name: EmptyNode
+  m_EditorClassIdentifier: 
+  isVisibleInTemplate: 0
+  id: 9
+  guid: b187b5e4bce90264b8aad626c0bddc11
+  nodePosition: {x: 241.81134, y: 304.75473}
+  storyGraph: {fileID: 11400000}
+  nameNode: 
+  childrenID: 
+  description: 
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72,7 +92,8 @@ MonoBehaviour:
   - {fileID: 3527077816008519805}
   - {fileID: -5533846575323496895}
   - {fileID: 4782261317501857250}
-  nextId: 8
+  - {fileID: -495324616407804580}
+  nextId: 10
   nodesID: 
   currentNodes: []
   runner: {fileID: 0}

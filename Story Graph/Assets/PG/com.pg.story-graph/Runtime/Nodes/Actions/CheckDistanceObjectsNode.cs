@@ -8,6 +8,7 @@ namespace PG.StorySystem
         [HideInInspector] public string targetObjectNameID;
         private Transform _targetTransform;
         private Transform _transform;
+        public override Color colorNode => Color.aquamarine;
         private enum CheckType
         {
             Less, Greater

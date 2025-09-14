@@ -14,7 +14,7 @@ namespace PG.StorySystem
         public StoryNode rootNode;
 
 
-        [HideInInspector] 
+        //[HideInInspector] 
         public List<StoryNode> nodes = new List<StoryNode>();
 
         [HideInInspector] 
@@ -26,7 +26,7 @@ namespace PG.StorySystem
         public List<StoryNode> currentNodes = new List<StoryNode>();
         [HideInInspector] public StoryGraphRunner runner;
 
-        [HideInInspector]
+
         public List<string> objects = new List<string>();
         [HideInInspector]
         public List<StoryVariable> variables = new List<StoryVariable>();
