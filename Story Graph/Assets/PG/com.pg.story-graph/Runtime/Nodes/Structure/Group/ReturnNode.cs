@@ -4,7 +4,7 @@ namespace PG.StorySystem.Nodes
 {
     public class ReturnNode : StructureNode
     {
-        public override string classGUI => "group";
+        public override Color colorNode => Color.yellowNice;
         protected override void OnEnd(StoryGraph storyGraph)
         {
         }

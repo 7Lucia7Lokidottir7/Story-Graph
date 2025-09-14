@@ -13,6 +13,6 @@ namespace PG.StorySystem.Nodes
         public virtual void InitializeCondition()
         {
         }
-        public override string classGUI => "condition";
+        public override Color colorNode => Color.lawnGreen;
     }
 }

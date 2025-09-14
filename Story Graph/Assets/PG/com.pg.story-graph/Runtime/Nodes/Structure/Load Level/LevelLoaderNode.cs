@@ -9,7 +9,7 @@ namespace PG.StorySystem.Nodes
         [SerializeField] 
         protected string _levelName;
         public string levelName => _levelName;
-        public override string classGUI => "load-level";
+        public override Color colorNode => Color.purple;
         protected Coroutine _coroutine;
         public void SetLevelName(string levelName) => _levelName = levelName;
         protected override void OnStart(StoryGraph storyGraph)

@@ -1,8 +1,10 @@
-﻿namespace PG.StorySystem.Nodes
+﻿using UnityEngine;
+
+namespace PG.StorySystem.Nodes
 {
     public class NotepadNode : StoryNode
     {
-        public override string classGUI => "notepad";
+        public override Color colorNode => Color.cornsilk;
         protected override void OnEnd(StoryGraph storyGraph)
         {
         }

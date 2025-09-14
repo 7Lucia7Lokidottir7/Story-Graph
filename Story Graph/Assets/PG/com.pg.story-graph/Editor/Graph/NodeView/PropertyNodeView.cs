@@ -10,7 +10,7 @@
         public PropertyNodeView(StoryNode node) : base(node)
         {
             MainStyle(node);
-            SetupClasses();
+            
             PropertyNode propertyNode = node as PropertyNode;
             updateNode += (node) =>
             {

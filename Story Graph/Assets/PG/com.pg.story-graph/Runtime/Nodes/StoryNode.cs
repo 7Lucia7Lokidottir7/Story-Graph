@@ -5,7 +5,7 @@ namespace PG.StorySystem.Nodes
 {
     public abstract class StoryNode : ScriptableObject
     {
-        public virtual Color colorNode => Color.clear;
+        public virtual Color colorNode => Color.indianRed;
         public virtual bool reinitNodeOnStart => true;
 
         [HideInInspector] public bool isVisibleInTemplate;
@@ -29,7 +29,6 @@ namespace PG.StorySystem.Nodes
 
         public event System.Action started, ended;
 
-        public virtual string classGUI => "";
 
         [HideInInspector, TextArea(3, 10)]
         public string description;

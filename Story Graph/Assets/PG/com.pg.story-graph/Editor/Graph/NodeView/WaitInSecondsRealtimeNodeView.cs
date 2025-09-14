@@ -8,7 +8,7 @@
         public WaitInSecondsRealtimeNodeView(StoryNode node) : base(node)
         {
             MainStyle(node);
-            SetupClasses();
+            
             WaitInSecondsRealtimeNode waitInSecondsNode = node as WaitInSecondsRealtimeNode;
             updateNode += (node) =>
             {

@@ -30,7 +30,6 @@ namespace PG.StorySystem
 
             CreateInputPorts();
             CreateOutputPorts();
-            SetupClasses();
         }
         protected void MainStyle(StoryNode node)
         {
@@ -44,15 +43,28 @@ namespace PG.StorySystem
             //title = node.GetName() + " " + GetType().Name;
             guid = node.guid;
             viewDataKey = guid;
-            if (storyNode.colorNode != Color.clear)
-            {
-                this.Q<VisualElement>("divider-style").style.backgroundColor = storyNode.colorNode;
-            }
+            TopNodeColorStyle();
+
             _descriptionLabel = this.Q<Label>("description");
             _descriptionLabel.text = node.description;
             _nameNodeLabel = this.Q<Label>("nameNode-label");
             _nameNodeLabel.text = node.nameNode;
         }
+
+        private void TopNodeColorStyle()
+        {
+            Color color = storyNode.colorNode;
+
+            // Преобразуем в HSV, понижаем насыщенность, обратно в RGB:
+            Color.RGBToHSV(color, out float h, out float s, out float v);
+
+            s *= 0.6f; // Вот, понижаем насыщенность в 2 раза! Можешь поставить 0.3f, если хочешь еще тусклее
+            v *= 0.8f;
+
+            Color lessSaturated = Color.HSVToRGB(h, s, v);
+            this.Q<VisualElement>("divider-style").style.backgroundColor = lessSaturated;
+        }
+
         public virtual List<int> GetChildrenList(int childID)
         {
             if (storyNode.childrenID.Contains(childID))
@@ -93,10 +105,6 @@ namespace PG.StorySystem
             _nameNodeLabel.text = node.nameNode;
             _descriptionLabel.text = node.description;
             updateNode?.Invoke(node);
-        }
-        protected void SetupClasses()
-        {
-            AddToClassList(storyNode.classGUI);
         }
 
         protected virtual void CreateInputPorts()

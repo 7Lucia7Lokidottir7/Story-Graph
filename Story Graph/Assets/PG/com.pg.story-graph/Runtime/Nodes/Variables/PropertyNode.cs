@@ -6,6 +6,6 @@ namespace PG.StorySystem.Nodes
     {
         [HideInInspector] public string storyVariableNameID;
         [HideInInspector] public string storyVariable2NameID;
-        public override string classGUI => "variable";
+        public override Color colorNode => Color.greenYellow;
     }
 }

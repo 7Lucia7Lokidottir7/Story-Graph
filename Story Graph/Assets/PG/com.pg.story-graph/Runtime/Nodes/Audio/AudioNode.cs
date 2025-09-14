@@ -10,7 +10,7 @@ namespace PG.StorySystem.Nodes
 
         protected AudioResource _audioResource;
 
-        public override string classGUI => "audio";
+        public override Color colorNode => Color.gold;
         protected override void OnStart(StoryGraph storyGraph)
         {
             Initialize(storyGraph);

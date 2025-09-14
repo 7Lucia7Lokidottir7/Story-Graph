@@ -8,7 +8,7 @@
         public LoadLevelNodeView(StoryNode node) : base(node)
         {
             MainStyle(node);
-            SetupClasses();
+            
             LoadLevelNode loadLevelNode = node as LoadLevelNode;
             updateNode += (node) =>
             {

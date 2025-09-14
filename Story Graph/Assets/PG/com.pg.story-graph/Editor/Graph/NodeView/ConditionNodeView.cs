@@ -16,7 +16,7 @@ namespace PG.StorySystem
         public ConditionNodeView(StoryNode node) : base(node)
         {
             MainStyle(node);
-            SetupClasses();
+            
             CreateVariableInputNode();
             CreateVariableOuputNode();
             PropertyNode propertyNode = node as PropertyNode;

@@ -5,7 +5,7 @@ namespace PG.StorySystem.Nodes
 {
     public class RootNode : StructureNode
     {
-        public override string classGUI => "root";
+        public override Color colorNode => Color.white;
         protected override void OnUpdate(StoryGraph storyGraph)
         {
         }

@@ -11,7 +11,7 @@ namespace PG.StorySystem
         private SeparatorNode _separatorNode;
         public SeparatorNodeView(StoryNode node) : base(node)
         {
-            SetupClasses();
+            
 
             storyNode = node;
             guid = node.guid;

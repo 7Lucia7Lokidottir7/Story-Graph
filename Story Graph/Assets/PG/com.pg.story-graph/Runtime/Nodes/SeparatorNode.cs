@@ -5,7 +5,7 @@ namespace PG.StorySystem.Nodes
     {
         [HideInInspector]
         public int previousNodesCount;
-        public override string classGUI => "separator";
+        public override Color colorNode => Color.clear;
         protected override void OnEnd(StoryGraph storyGraph)
         {
         }

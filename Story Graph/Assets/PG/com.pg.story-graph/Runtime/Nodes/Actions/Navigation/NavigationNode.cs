@@ -4,7 +4,7 @@ namespace PG.StorySystem.Nodes
 {
     public abstract class NavigationNode : ActionNode
     {
-        public override string classGUI => "navigation";
+        public override Color colorNode => Color.forestGreen;
         protected NavMeshAgent _agent;
         [SerializeField] protected float _speed = 3.5f;
         [SerializeField] protected float _angularSpeed = 120f;

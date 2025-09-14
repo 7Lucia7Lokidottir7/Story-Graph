@@ -13,7 +13,7 @@ namespace PG.StorySystem
         public GroupNodeView(StoryNode node) : base(node)
         {
             MainStyle(node);
-            SetupClasses();
+            
             OpenButton(node);
             updateNode += (n) =>
             {

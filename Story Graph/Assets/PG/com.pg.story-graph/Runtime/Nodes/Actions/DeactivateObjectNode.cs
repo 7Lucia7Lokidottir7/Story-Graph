@@ -5,7 +5,7 @@ namespace PG.StorySystem.Nodes
     {
         private Transform _transform;
 
-        public override string classGUI => "activate-object";
+        public override Color colorNode => Color.green;
         protected override void OnEnd(StoryGraph storyGraph)
         {
         }

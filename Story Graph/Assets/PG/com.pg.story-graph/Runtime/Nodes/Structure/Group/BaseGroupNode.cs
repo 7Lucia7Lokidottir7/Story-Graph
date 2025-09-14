@@ -17,7 +17,7 @@ namespace PG.StorySystem.Nodes
         public List<StoryNode> storyNodes = new List<StoryNode>(), 
             currentNodes = new List<StoryNode>();
 
-        public override string classGUI => "group";
+        public override Color colorNode => Color.yellowNice;
         protected override void OnEnd(StoryGraph storyGraph)
         {
         }

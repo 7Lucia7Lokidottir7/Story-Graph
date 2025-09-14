@@ -10,7 +10,7 @@ namespace PG.StorySystem
         public RootNodeView(StoryNode node) : base(node)
         {
             MainStyle(node);
-            SetupClasses();
+            
 
             VisualElement buttonContainer = this.Q<VisualElement>("button-container");
             Button setMainButton = new Button();

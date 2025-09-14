@@ -9,7 +9,7 @@ namespace PG.StorySystem
         public NotepadNodeView(StoryNode node) : base(node)
         {
             MainStyle(node);
-            SetupClasses();
+            
         }
         protected override void CreateInputPorts()
         {

@@ -8,7 +8,7 @@
         public UnloadLevelNodeView(StoryNode node) : base(node)
         {
             MainStyle(node);
-            SetupClasses();
+            
             UnloadLevelNode unloadLevelNode = node as UnloadLevelNode;
             updateNode += (node) =>
             {

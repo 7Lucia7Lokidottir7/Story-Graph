@@ -15,7 +15,7 @@ namespace PG.StorySystem
         public BranchNodeView(StoryNode node) : base(node)
         {
             MainStyle(node);
-            SetupClasses();
+            
             CreateVariableInputNode();
         }
         protected override void CreateVariableInputNode()

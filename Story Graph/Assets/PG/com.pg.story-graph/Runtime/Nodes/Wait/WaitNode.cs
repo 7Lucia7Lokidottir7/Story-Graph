@@ -8,7 +8,7 @@ namespace PG.StorySystem.Nodes
     {
         protected Coroutine _coroutine;
 
-        public override string classGUI => "wait";
+        public override Color colorNode => Color.darkCyan;
         protected override void OnEnd(StoryGraph storyGraph)
         {
             if (_coroutine != null)

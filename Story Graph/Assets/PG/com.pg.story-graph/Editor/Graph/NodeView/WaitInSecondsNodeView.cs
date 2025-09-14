@@ -8,7 +8,7 @@ namespace PG.StorySystem
         public WaitInSecondsNodeView(StoryNode node) : base(node)
         {
             MainStyle(node);
-            SetupClasses();
+            
             WaitInSecondsNode waitInSecondsNode = node as WaitInSecondsNode;
             updateNode += (node) =>
             {

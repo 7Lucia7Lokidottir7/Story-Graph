@@ -4,7 +4,7 @@ namespace PG.StorySystem.Nodes
 {
     public abstract class PhysicsNode : ActionNode
     {
-        public override string classGUI => "physics";
+        public override Color colorNode => Color.cornflowerBlue;
         protected Rigidbody _rigidbody;
         protected override void Init(StoryGraph storyGraph)
         {

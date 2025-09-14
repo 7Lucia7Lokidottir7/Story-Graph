@@ -13,7 +13,7 @@ namespace PG.StorySystem
         public MergeNodeView(StoryNode node) : base(node)
         {
             MainStyle(node);
-            SetupClasses();
+            
         }
         protected override void CreateInputPorts()
         {
