@@ -5,6 +5,7 @@ namespace PG.StorySystem.Nodes
     public class AnimationNode : ActionNode
     {
         private Animator _animator;
+        [NodeDataTitle]
         [HideInInspector] public string parameter;
         [HideInInspector] public enum AnimatorParameterType { Trigger, Float, Int, Bool }
         [HideInInspector] public AnimatorParameterType parameterType;

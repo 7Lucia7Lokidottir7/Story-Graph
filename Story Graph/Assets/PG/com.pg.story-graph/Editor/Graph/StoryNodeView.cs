@@ -39,7 +39,18 @@ namespace PG.StorySystem
             }
 
             storyNode = node;
-            title = node.GetName();
+
+            var field = AttributeHelper.GetFieldWithNodeTitleAttribute(node);
+            if (field != null)
+            {
+                var value = field.GetValue(node);
+                title = node.GetName() + $"({value})";
+            }
+            else
+            {
+                title = node.GetName();
+            }
+
             //title = node.GetName() + " " + GetType().Name;
             guid = node.guid;
             viewDataKey = guid;

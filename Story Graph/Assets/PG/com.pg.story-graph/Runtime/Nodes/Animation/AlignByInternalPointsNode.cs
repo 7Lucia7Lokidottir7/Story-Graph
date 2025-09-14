@@ -5,6 +5,9 @@ namespace PG.StorySystem.Nodes
     {
         private Transform _transform;
         private Transform _transformPoint;
+
+        [InspectorLabel("Aligment Object")]
+        [StoryGraphDropdown("objects")]
         [HideInInspector] public string aligmentObjectNameID;
         private Transform _transformAlignmentPoint;
         [SerializeField] private bool _resetLocalRotationBeforeAlign;

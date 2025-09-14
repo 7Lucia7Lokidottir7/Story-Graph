@@ -3,7 +3,10 @@ namespace PG.StorySystem.Nodes
 {
     public abstract class CollisionByObjectNode : CollisionNode
     {
-        [HideInInspector] public string targetObjectNameID;
+        [HideInInspector]
+        [InspectorLabel("Target Object")]
+        [StoryGraphDropdown("objects")] 
+        public string targetObjectNameID;
         protected Transform _targetTransform;
         protected override void Init(StoryGraph storyGraph)
         {

@@ -39,6 +39,7 @@ namespace PG.StorySystem.NodesEditor
         {
             VisualElement root = new VisualElement();
 
+            AddStoryGraphDropdowns(root);
 
             Toggle visibleInTemplate = new Toggle("Visible In Template");
             visibleInTemplate.value = _storyNode.isVisibleInTemplate;
@@ -247,8 +248,57 @@ namespace PG.StorySystem.NodesEditor
         {
 
         }
+        private void AddStoryGraphDropdowns(VisualElement root)
+        {
+            var node = target;
+            var type = node.GetType();
+            var fields = type.GetFields(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
+
+            foreach (var field in fields)
+            {
+                var dropdownAttr = field.GetCustomAttribute<StoryGraphDropdownAttribute>();
+                if (dropdownAttr == null) continue;
+                if (field.FieldType != typeof(string)) continue;
+
+                List<string> items = null;
+                var listField = GetType().GetField(dropdownAttr.sourceListField, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy);
+                if (listField != null)
+                    items = listField.GetValue(this) as List<string>;
+                else
+                {
+                    var listProp = GetType().GetProperty(dropdownAttr.sourceListField, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.FlattenHierarchy);
+                    if (listProp != null)
+                        items = listProp.GetValue(this) as List<string>;
+                }
+                if (items == null) continue;
+
+                string currentValue = field.GetValue(node) as string ?? "";
+
+                // ==== Сюда добавляем обработку InspectorLabelAttribute ====
+                var labelAttr = field.GetCustomAttribute<InspectorLabelAttribute>();
+                string labelName = labelAttr != null && !string.IsNullOrEmpty(labelAttr.label)
+                    ? labelAttr.label
+                    : ObjectNames.NicifyVariableName(field.Name);
+
+                root.Add(new Label(labelName));
+                var dropdown = new SearchableDropdownField(items, currentValue, field.Name);
+                dropdown.OnValueChanged += val =>
+                {
+                    Undo.RecordObject(target, $"Change {field.Name}");
+                    field.SetValue(node, val);
+                    EditorUtility.SetDirty(target);
+                };
+                root.Add(dropdown);
+            }
+        }
+
+
+
         public List<string> objects => StoryGraphEditorWindow.storyGraph.objects;
-        public List<string> variables => StoryGraphEditorWindow.storyGraph.variables.Select(v => v.variableName).ToList();
+        public List<string> variables => StoryGraphEditorWindow
+          .storyGraph
+          .variables
+          .Select(v => v.variableName).ToList();
         public void ObjectsPopup(ref int data, StoryNode storyNode)
         {
             data = EditorGUILayout.Popup(data, objects.ToArray());

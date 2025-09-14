@@ -5,7 +5,10 @@ namespace PG.StorySystem.Nodes
     public class PlaySoundNode : AudioNode
     {
         public AudioResource audioClip;
-        [HideInInspector]public string audioSourceNameIndex;
+        [HideInInspector]
+        [InspectorLabel("Object")]
+        [StoryGraphDropdown("objects")]
+        public string audioSourceNameIndex;
         private GameObject _gameObject;
         private AudioSource _audioSource;
         private float _standardVolume;

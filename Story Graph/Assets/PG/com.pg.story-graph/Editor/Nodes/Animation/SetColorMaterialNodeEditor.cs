@@ -18,17 +18,6 @@ namespace PG.StorySystem.NodesEditor
         {
             base.OnCustomElement(root);
 
-            root.Add(new Label("Object"));
-            SearchableDropdownField dropdownField = new SearchableDropdownField();
-            dropdownField.tooltip = "An object is selected from a list of objects that can be created or deleted in the Objects panel. \n\n To install an object on the scene, set the 'ObjectElement' component on the object and set the desired 'StoryGraph' inside, and then select the object from the list of objects.";
-            dropdownField.choices = objects;
-            dropdownField.value = _setColorMaterialNode.objectNameID;
-            dropdownField.OnValueChanged += evt => {
-                _setColorMaterialNode.objectNameID = evt;
-                EditorUtility.SetDirty(_setColorMaterialNode);
-            };
-            root.Add(dropdownField);
-
 
             Toggle useLerp = new Toggle("Use Lerp");
 

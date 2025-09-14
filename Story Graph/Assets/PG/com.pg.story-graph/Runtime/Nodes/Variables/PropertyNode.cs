@@ -4,8 +4,10 @@ namespace PG.StorySystem.Nodes
 {
     public abstract class PropertyNode : StoryNode
     {
-        [HideInInspector] public string storyVariableNameID;
-        [HideInInspector] public string storyVariable2NameID;
+        [HideInInspector] 
+        public string storyVariableNameID;
+        [HideInInspector] 
+        public string storyVariable2NameID;
         public override Color colorNode => Color.greenYellow;
     }
 }

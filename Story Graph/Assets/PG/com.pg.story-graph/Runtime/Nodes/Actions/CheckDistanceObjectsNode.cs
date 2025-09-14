@@ -4,8 +4,10 @@ namespace PG.StorySystem
 {
     public class CheckDistanceObjectsNode : ActionNode
     {
-        [HideInInspector]public int targetObjectID;
-        [HideInInspector] public string targetObjectNameID;
+        [HideInInspector]
+        [InspectorLabel("Target Object")]
+        [StoryGraphDropdown("objects")]
+        public string targetObjectNameID;
         private Transform _targetTransform;
         private Transform _transform;
         public override Color colorNode => Color.aquamarine;

@@ -10,7 +10,10 @@ namespace PG.StorySystem.Nodes
         [SerializeField] protected float _angularSpeed = 120f;
         [SerializeField] protected float _acceleration = 2f;
         [SerializeField] protected float _stoppingDistance = 1f;
-        [HideInInspector] public string targetObjectNameID;
+        [HideInInspector]
+        [InspectorLabel("Target Point")]
+        [StoryGraphDropdown("objects")]
+        public string targetObjectNameID;
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _agent);

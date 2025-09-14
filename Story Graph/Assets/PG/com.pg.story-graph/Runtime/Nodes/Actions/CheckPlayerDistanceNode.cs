@@ -12,6 +12,8 @@ namespace PG.StorySystem
             Less, Greater
         }
         [SerializeField] private CheckType _checkType;
+
+        [NodeDataTitle]
         [SerializeField] private float _targetDistance;
         private Camera _camera;
         private Vector3 _playerPosition => new Vector3(_camera.transform.position.x, _characterController.center.y - _characterController.height / 2, _camera.transform.position.z);

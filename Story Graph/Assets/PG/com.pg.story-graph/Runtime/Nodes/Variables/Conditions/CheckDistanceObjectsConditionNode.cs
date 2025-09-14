@@ -3,8 +3,14 @@ namespace PG.StorySystem.Nodes
 {
     public class CheckDistanceObjectsConditionNode : ConditionNode
     {
-        [HideInInspector]public string objectNameID;
-        [HideInInspector] public string targetObjectNameID;
+        [HideInInspector]
+        [StoryGraphDropdown("objects")]
+        public string objectNameID;
+        
+        [HideInInspector] 
+        [StoryGraphDropdown("objects")]
+        public string targetObjectNameID;
+        
         [HideInInspector] public Vector3 targetVector;
         [SerializeField] private float _targetDistance;
 

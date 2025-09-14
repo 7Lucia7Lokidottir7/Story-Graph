@@ -3,7 +3,10 @@ namespace PG.StorySystem.Nodes
 {
     public abstract class TransformNode : ActionNode
     {
-        [HideInInspector] public string targetObjectNameID;
+        [HideInInspector]
+        [InspectorLabel("Target Object")]
+        [StoryGraphDropdown("objects")] 
+        public string targetObjectNameID;
         public override Color colorNode => Color.aliceBlue;
     }
 }
