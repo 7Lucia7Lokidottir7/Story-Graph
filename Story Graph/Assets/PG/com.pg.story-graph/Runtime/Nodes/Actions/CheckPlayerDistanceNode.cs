@@ -15,8 +15,6 @@ namespace PG.StorySystem
 
         [NodeDataTitle]
         [SerializeField] private float _targetDistance;
-        private Camera _camera;
-        private Vector3 _playerPosition => new Vector3(_camera.transform.position.x, _characterController.center.y - _characterController.height / 2, _camera.transform.position.z);
         protected override void OnEnd(StoryGraph storyGraph)
         {
 
@@ -25,7 +23,6 @@ namespace PG.StorySystem
         {
             storyGraph.GetObject(objectNameID, out _transform);
             Transform transform = GameObject.FindGameObjectWithTag(PLAYER_TAG).transform;
-            _camera = transform.GetComponentInChildren<Camera>();
             transform.TryGetComponent(out _characterController);
         }
         protected override void OnStart(StoryGraph storyGraph)
@@ -39,13 +36,13 @@ namespace PG.StorySystem
                 switch (_checkType)
                 {
                     case CheckType.Less:
-                        if (Vector3.Distance(_transform.position, _playerPosition) < _targetDistance)
+                        if (Vector3.Distance(_transform.position, _characterController.transform.position) < _targetDistance)
                         {
                             TransitionToNextNodes(storyGraph);
                         }
                         break;
                     case CheckType.Greater:
-                        if (Vector3.Distance(_transform.position, _playerPosition) > _targetDistance)
+                        if (Vector3.Distance(_transform.position, _characterController.transform.position) > _targetDistance)
                         {
                             TransitionToNextNodes(storyGraph);
                         }

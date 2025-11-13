@@ -4,6 +4,9 @@ namespace PG.StorySystem.Nodes
 {
     public abstract class BaseInteractionWithObjectsNode : StoryNode
     {
+        [HideInInspector]
+        [InspectorLabel("Object")]
+        [StoryGraphDropdown("objects")]
         public List<string> objectNamesID = new List<string>();
         protected List<Transform> _objects = new List<Transform>();
         protected override void Init(StoryGraph storyGraph)
