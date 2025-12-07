@@ -50,9 +50,9 @@ namespace PG.StorySystem
                 }
             }
         }
-        public override void UnConnectToInputNode(Edge edge)
+        public override void DisconnectFromInputPort(Edge edge)
         {
-            base.UnConnectToInputNode(edge);
+            base.DisconnectFromInputPort(edge);
             if (edge != null)
             {
                 if (edge.input.node == this)
@@ -68,9 +68,9 @@ namespace PG.StorySystem
                 }
             }
         }
-        public override void ConnectToOutputNode(Edge edge)
+        public override void ConnectFromOutputPort(Edge edge)
         {
-            base.ConnectToOutputNode(edge);
+            base.ConnectFromOutputPort(edge);
             if (edge != null)
             {
                 if (edge.input.node is MergeNodeView mergeNodeView)
@@ -80,9 +80,9 @@ namespace PG.StorySystem
                 }
             }
         }
-        public override void UnConnectToOutputNode(Edge edge)
+        public override void DisconnectFromOutputPort(Edge edge)
         {
-            base.UnConnectToOutputNode(edge);
+            base.DisconnectFromOutputPort(edge);
             if (edge != null)
             {
                 if (edge.input.node is MergeNodeView mergeNodeView)

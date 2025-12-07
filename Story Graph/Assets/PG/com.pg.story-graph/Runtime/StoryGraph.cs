@@ -3,7 +3,6 @@ using UnityEngine;
 namespace PG.StorySystem
 {
     using Nodes;
-    using System;
     using System.Collections;
 
     [CreateAssetMenu(fileName ="New Story Graph", menuName ="PG/Story Graph")]
@@ -34,6 +33,12 @@ namespace PG.StorySystem
 
 
         public System.Action initialized;
+
+        [HideInInspector]
+        public List<StoryGroupData> groups = new();
+        [HideInInspector]
+        public List<StoryStickyNoteData> stickyNoteDatas = new();
+
         public void StopCoroutine(Coroutine routine)
         {
             runner.StopCoroutine(routine);

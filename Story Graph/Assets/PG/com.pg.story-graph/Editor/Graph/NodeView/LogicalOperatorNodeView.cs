@@ -67,7 +67,7 @@ namespace PG.StorySystem
             }
         }
 
-        public override void UnConnectToInputNode(Edge edge)
+        public override void DisconnectFromInputPort(Edge edge)
         {
             ConditionNodeView conditionNodeView = edge.output.node as ConditionNodeView;
             ConditionNode conditionNode = conditionNodeView.storyNode as ConditionNode;

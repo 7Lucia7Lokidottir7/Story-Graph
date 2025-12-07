@@ -61,13 +61,13 @@ namespace PG.StorySystem
         public override void ConnectToInputNode(Edge edge)
         {
         }
-        public override void UnConnectToInputNode(Edge edge)
+        public override void DisconnectFromInputPort(Edge edge)
         {
         }
-        public override void ConnectToOutputNode(Edge edge)
+        public override void ConnectFromOutputPort(Edge edge)
         {
         }
-        public override void UnConnectToOutputNode(Edge edge)
+        public override void DisconnectFromOutputPort(Edge edge)
         {
         }
     }

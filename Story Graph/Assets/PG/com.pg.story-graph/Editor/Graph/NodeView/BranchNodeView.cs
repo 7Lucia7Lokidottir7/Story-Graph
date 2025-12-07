@@ -104,7 +104,7 @@ namespace PG.StorySystem
                 base.ConnectToInputNode(edge);
             }
         }
-        public override void UnConnectToInputNode(Edge edge)
+        public override void DisconnectFromInputPort(Edge edge)
         {
 
             BranchNode branchNode = storyNode as BranchNode;
@@ -119,10 +119,10 @@ namespace PG.StorySystem
             }
             else
             {
-                base.UnConnectToInputNode(edge);
+                base.DisconnectFromInputPort(edge);
             }
         }
-        public override void ConnectToOutputNode(Edge edge)
+        public override void ConnectFromOutputPort(Edge edge)
         {
             BranchNode branchNode = storyNode as BranchNode;
             StoryNodeView child = edge.input.node as StoryNodeView;
@@ -132,10 +132,10 @@ namespace PG.StorySystem
             }
             else if (edge.output.portName == "Out True")
             {
-                base.ConnectToOutputNode(edge);
+                base.ConnectFromOutputPort(edge);
             }
         }
-        public override void UnConnectToOutputNode(Edge edge)
+        public override void DisconnectFromOutputPort(Edge edge)
         {
             BranchNode branchNode = storyNode as BranchNode;
             if (edge.output.portName == "Out False")
@@ -145,7 +145,7 @@ namespace PG.StorySystem
             }
             else if (edge.output.portName == "Out True")
             {
-                base.UnConnectToOutputNode(edge);
+                base.DisconnectFromOutputPort(edge);
             }
         }
     }

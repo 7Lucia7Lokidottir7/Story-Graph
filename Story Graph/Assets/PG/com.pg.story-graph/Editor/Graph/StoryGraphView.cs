@@ -1,16 +1,17 @@
-using System.Collections.Generic;
-using System;
-using System.Linq;
-using UnityEditor;
-using UnityEngine;
-using PG.StorySystem.Graph;
-using PG.StorySystem.Nodes;
 using PG.StorySystem;
-using UnityEngine.UIElements;
+using PG.StorySystem.Nodes;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.UIElements;
-using System.Threading.Tasks;
+using UnityEngine;
 using UnityEngine.Profiling;
+using UnityEngine.UIElements;
+using PG.StorySystem.Graph;
+
 
 
 //For Unity 6 and later
@@ -19,7 +20,6 @@ using UnityEngine.Profiling;
 #endif
 public sealed partial class StoryGraphView : GraphView
 {
-    //For Unity 2022 LTS and older
 #if !UNITY_6000_0_OR_NEWER
     public new class UxmlFactory : UxmlFactory<StoryGraphView, UxmlTraits> { }
 #endif
@@ -30,38 +30,34 @@ public sealed partial class StoryGraphView : GraphView
 
     public BaseGroupNode currentGroupNode => _currentGroupNode;
 
-    [NonSerialized]
-    private List<StoryNode> _temporaryNodes = new List<StoryNode>(); // Временный список нод для текущего отображения
-    private BaseGroupNode _currentGroupNode; // Текущая группа (слой)
+    [NonSerialized] private List<StoryNode> _temporaryNodes = new List<StoryNode>();
+    private BaseGroupNode _currentGroupNode;
+
+    private Dictionary<Group, StoryGroupData> _groupMap = new();
+    private Dictionary<StickyNote, StoryStickyNoteData> _stickyNotesMap = new();
 
     private int _currentClicks = 0;
 
     private bool _saveAssetsScheduled = false;
-    // Список для хранения скопированных узлов
     private ClipboardNodes _clipboardNodes = new ClipboardNodes();
 
-    private Vector2 _createdNodeOffset = new Vector2(25, 40);
-    private int _pasteIndex = 1;
 
-    [Serializable]
+    [System.Serializable]
     private class ClipboardNodes
     {
         public List<StoryNode> copiedNodes = new List<StoryNode>();
+        public List<StoryStickyNoteData> copiedStickyNotes = new List<StoryStickyNoteData>();
     }
 
-    private event Action<StoryNode> _nodeCreated = default;
+    private event System.Action<StoryNode> _nodeCreated = default;
+
+    private Vector2 _createNodeOffset = new Vector2(25, 40);
+    private int _pasteIndex = 1;
 
     public StoryGraphEditorWindow window
     {
         get => _window;
-        set
-        {
-            _window = value;
-            if (_window != null)
-            {
-                InitializeObjects();
-            }
-        }
+        set { _window = value; if (_window != null) InitializeObjects(); }
     }
     private StoryGraphEditorWindow _window;
     private StoryGraphSearchWindow _searchWindow;
@@ -83,178 +79,215 @@ public sealed partial class StoryGraphView : GraphView
         this.AddManipulator(new SelectionDragger());
         this.AddManipulator(new RectangleSelector());
 
-
         Undo.undoRedoPerformed += OnUndoRedo;
         InitializeObjects();
 
         CustomStoryNodeViewFactory.RegisterCustomNodeViews();
 
-
-        // Подписываемся на события для обработки операций копирования и вставки
         serializeGraphElements += CutCopyOperation;
         unserializeAndPaste += PasteOperation;
 
+        elementsAddedToGroup += OnElementsAddedToGroup;
+        elementsRemovedFromGroup += OnElementsRemovedFromGroup;
+        groupTitleChanged += OnGroupTitleChanged;
+
         this.RegisterCallback<MouseDownEvent>(OnMouseDown, TrickleDown.TrickleDown);
+
+        this.RegisterCallback<KeyDownEvent>(RegisterSave);
     }
+
+    private void RegisterSave(KeyDownEvent evt)
+    {
+        if (evt != null && evt.keyCode == KeyCode.S && evt.ctrlKey)
+        {
+            SaveChanges();
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+    }
+
+
+    /// <summary>
+    /// Возвращает центр экрана (вьюпорта) в координатах контента графа.
+    /// </summary>
+    private Vector2 GetContentViewportCenter()
+    {
+        // 1. Берём визуальные границы видимого окна GraphView
+        var vp = viewport.worldBound;
+        Vector2 vpCenter = new Vector2(vp.width * 0.5f, vp.height * 0.5f);
+
+        // 2. Берём текущие пан и масштаб контента
+        var t = contentViewContainer.resolvedStyle;
+        Vector2 pan = new Vector2(t.translate.x, t.translate.y);
+        Vector2 scale = new Vector2(t.scale.value.x, t.scale.value.y);
+
+        // 3. Конвертируем координаты центра вьюпорта в координаты контента
+        float sx = Mathf.Approximately(scale.x, 0f) ? 1f : scale.x;
+        float sy = Mathf.Approximately(scale.y, 0f) ? 1f : scale.y;
+
+        return new Vector2((vpCenter.x - pan.x) / sx, (vpCenter.y - pan.y) / sy);
+    }
+
+
+
+
     #region Copy, Paste and Dublicate
     private void PasteOperation(string operationName, string data)
     {
         JsonUtility.FromJsonOverwrite(data, _clipboardNodes);
 
-        Dictionary<int, int> idMapping = new Dictionary<int, int>(); // Соответствие старых и новых ID
-        List<StoryNode> newNodes = new List<StoryNode>(); // Хранение всех новых нод для последующей обработки связей
+        var idMapping = new Dictionary<int, int>();
+        var newNodes = new List<StoryNode>();
 
-        for (int i = 0; i < _clipboardNodes.copiedNodes.Count; i++)
+        // PERF: пакетируем добавление в ассет
+        AssetDatabase.StartAssetEditing();
+        try
         {
-            StoryNode originalNode = _clipboardNodes.copiedNodes[i];
-            StoryNode newNode = ScriptableObject.Instantiate(originalNode);
-
-            // Создаем новый уникальный ID и сохраняем соответствие
-            newNode.guid = GUID.Generate().ToString();
-            newNode.nodePosition += _createdNodeOffset * _pasteIndex;
-            _pasteIndex++;
-
-            storyGraph.nextId++;
-            int oldId = originalNode.id;
-            int newId = storyGraph.nextId;
-            newNode.id = newId;
-            idMapping[oldId] = newId;
-
-            // Отсоединяем от старых детей
-            newNode.childrenID = new List<int>();
-
-            // Добавляем новую ноду в AssetDatabase
-            AssetDatabase.AddObjectToAsset(newNode, storyGraph);
-            if (newNode is BaseGroupNode groupNode1)
+            for (int i = 0; i < _clipboardNodes.copiedNodes.Count; i++)
             {
-                CopyGroup(groupNode1);
+                var originalNode = _clipboardNodes.copiedNodes[i];
+                var newNode = ScriptableObject.Instantiate(originalNode);
+
+                newNode.guid = GUID.Generate().ToString();
+                newNode.nodePosition = GetContentViewportCenter() + _createNodeOffset * _pasteIndex;
+
+                storyGraph.nextId++;
+                int oldId = originalNode.id;
+                int newId = storyGraph.nextId;
+                newNode.id = newId;
+                idMapping[oldId] = newId;
+
+                newNode.childrenID = new List<int>();
+
+                AssetDatabase.AddObjectToAsset(newNode, storyGraph);
+                if (newNode is BaseGroupNode groupNode1)
+                {
+                    CopyGroup(groupNode1);
+                }
+                Undo.RegisterCreatedObjectUndo(newNode, "Story Graph (Copied Node)");
+
+                _temporaryNodes.Add(newNode);
+                newNodes.Add(newNode);
             }
-            Undo.RegisterCreatedObjectUndo(newNode, "Story Graph (Copied Node)");
-
-            // Добавляем новую ноду в граф
-            Undo.RecordObject(storyGraph, "Story Graph (Copied Node)");
-
-            _temporaryNodes.Add(newNode);
-
-            newNodes.Add(newNode); // Сохраняем для последующей обработки
+        }
+        finally
+        {
+            AssetDatabase.StopAssetEditing();
         }
 
-        // Восстанавливаем связи между скопированными нодами
-        foreach (StoryNode newNode in newNodes)
-        {
-            StoryNode originalNode = _clipboardNodes.copiedNodes.FirstOrDefault(node => node.id == idMapping.FirstOrDefault(pair => pair.Value == newNode.id).Key);
+        _pasteIndex++;
 
+
+        foreach (var newNode in newNodes)
+        {
+            var originalNode = _clipboardNodes.copiedNodes
+                .FirstOrDefault(node => node.id == idMapping.FirstOrDefault(pair => pair.Value == newNode.id).Key);
             if (originalNode != null)
-            {
                 newNode.OnDublicateChildren(idMapping, originalNode);
+        }
+
+
+        foreach (var newNode in newNodes)
+            CreateStoryNodeView(newNode, newNode.nodePosition);
+
+        foreach (var parent in newNodes)
+        {
+            var parentView = FindNodeView(parent);
+            if (parentView == null) continue;
+
+            foreach (int childId in parent.childrenID)
+            {
+                var childNode = storyGraph.GetNodeByID(childId, _currentGroupNode);
+                var childView = FindNodeView(childNode);
+                if (childView != null && parentView.output != null && childView.input != null)
+                {
+                    var e = parentView.output.ConnectTo(childView.input);
+                    AddElement(e);
+                }
             }
         }
+
         SaveChanges();
-        PopulateView(storyGraph);
     }
-
-
 
     private string CutCopyOperation(IEnumerable<GraphElement> elements)
     {
         _clipboardNodes.copiedNodes.Clear();
         _pasteIndex = 1;
-        //throw new NotImplementedException();
+
         foreach (var element in elements)
         {
-            if (element != null && element is StoryNodeView nodeView)
+            if (element is StoryNodeView nodeView && nodeView.storyNode != null)
             {
-                StoryNode storyNode = ScriptableObject.Instantiate(nodeView.storyNode);
-                storyNode.guid = GUID.Generate().ToString();
-                storyNode.nodePosition += _createdNodeOffset * _pasteIndex;
-                _clipboardNodes.copiedNodes.Add(storyNode);
+                var clone = ScriptableObject.Instantiate(nodeView.storyNode);
+                clone.guid = GUID.Generate().ToString();
+                _clipboardNodes.copiedNodes.Add(clone);
             }
         }
         return JsonUtility.ToJson(_clipboardNodes);
     }
+
     void CopyGroup(BaseGroupNode groupNode)
     {
-        List<StoryNode> originalNodes = new List<StoryNode>(groupNode.storyNodes); // Сохраняем исходные ссылки
-        List<StoryNode> newNodes = new List<StoryNode>(); // Для хранения новых скопированных нод
+        var originalNodes = new List<StoryNode>(groupNode.storyNodes);
+        var newNodes = new List<StoryNode>();
+        var idMapping = new Dictionary<int, int>();
 
-        Dictionary<int, int> idMapping = new Dictionary<int, int>(); // Для сохранения старых и новых ID
-
-        // Копируем каждую ноду
         foreach (StoryNode originalNode in originalNodes)
         {
-            StoryNode newNode = ScriptableObject.Instantiate(originalNode);
-
-            // Создаем новый уникальный ID
+            var newNode = ScriptableObject.Instantiate(originalNode);
             newNode.guid = GUID.Generate().ToString();
-            newNode.nodePosition += _createdNodeOffset * _pasteIndex;
 
             storyGraph.nextId++;
             int oldId = originalNode.id;
             int newId = storyGraph.nextId;
             newNode.id = newId;
-
-            // Сохраняем соответствие старого и нового ID
             idMapping[oldId] = newId;
 
-            // Если нода — это вложенная группа, вызываем CopyGroup рекурсивно
             if (newNode is BaseGroupNode childGroupNode)
-            {
                 CopyGroup(childGroupNode);
-            }
 
-            // Отсоединяем от старых связей
             newNode.childrenID = new List<int>();
 
-            // Добавляем новую ноду в AssetDatabase
             AssetDatabase.AddObjectToAsset(newNode, storyGraph);
             Undo.RegisterCreatedObjectUndo(newNode, "Story Graph (Copied Node)");
 
             newNodes.Add(newNode);
         }
 
-        // Восстанавливаем связи между скопированными нодами
-        foreach (StoryNode newNode in newNodes)
+        foreach (var newNode in newNodes)
         {
-            StoryNode originalNode = originalNodes.FirstOrDefault(node => node.id == idMapping.FirstOrDefault(pair => pair.Value == newNode.id).Key);
-
+            var originalNode = originalNodes.FirstOrDefault(node => node.id == idMapping.FirstOrDefault(p => p.Value == newNode.id).Key);
             if (originalNode != null)
             {
                 foreach (int oldChildId in originalNode.childrenID)
-                {
                     if (idMapping.TryGetValue(oldChildId, out int newChildId))
-                    {
-                        newNode.childrenID.Add(newChildId); // Устанавливаем связи с новыми нодами
-                    }
-                }
+                        newNode.childrenID.Add(newChildId);
             }
         }
 
-        // Заменяем старые ноды в группе новыми
         groupNode.storyNodes.Clear();
         groupNode.storyNodes.AddRange(newNodes);
 
         Undo.RecordObject(storyGraph, "Story Graph (Copied Node)");
     }
-
     #endregion
+
+
 
     public void AddGroupLayer(BaseGroupNode targetGroupNode)
     {
-        ToolbarButton layerButton = new ToolbarButton();
+        var layerButton = new ToolbarButton();
         layerButton.text = !string.IsNullOrWhiteSpace(targetGroupNode.nameGroup) ? targetGroupNode.nameGroup : targetGroupNode.GetName();
-        layerButton.clicked += () => {
-            _currentGroupNode = targetGroupNode;
-            RemoveLayer(layerButton);
-        };
+        layerButton.clicked += () => { _currentGroupNode = targetGroupNode; RemoveLayer(layerButton); };
         buttons.Add(layerButton);
         if (StoryGraphEditorWindow.toolbarBreadcrumbs != null)
-        {
             StoryGraphEditorWindow.toolbarBreadcrumbs.Add(layerButton);
-        }
     }
+
     public void RemoveLayer(ToolbarButton button)
     {
-        for (int i = buttons.IndexOf(button)+1; i < buttons.Count; i++)
+        for (int i = buttons.IndexOf(button) + 1; i < buttons.Count; i++)
         {
             StoryGraphEditorWindow.toolbarBreadcrumbs.Remove(buttons[i]);
             buttons.RemoveAt(i);
@@ -266,19 +299,62 @@ public sealed partial class StoryGraphView : GraphView
     {
         if (window != null)
         {
-            SetupSliderZoom();
-
             Button centerButton = window.root.Q<Button>("CenterButton");
-            centerButton.clicked += () => viewTransform.position = viewTransform.scale / storyGraph.rootNode.nodePosition;
+            if (centerButton != null)
+            {
+                centerButton.clicked += () =>
+                {
+                    CenterOnCurrentLayer();
+                };
+
+            }
         }
     }
+    private void CenterOnCurrentLayer()
+    {
+        StoryNode nodeToCenter = null;
+
+        if (_currentGroupNode != null)
+            nodeToCenter = _currentGroupNode.rootNode;
+        else if (_storyGraph != null)
+            nodeToCenter = _storyGraph.rootNode;
+
+        // Если есть главная нода и у неё есть StoryNodeView — центрируемся по ней
+        if (nodeToCenter != null && FindNodeView(nodeToCenter) != null)
+        {
+            CenterViewport(nodeToCenter.nodePosition);
+        }
+        else
+        {
+            // Иначе — в (0, 0)
+            CenterViewport(Vector2.zero);
+        }
+    }
+    public void CenterViewport(Vector2 contentPosition)
+    {
+        schedule.Execute(() =>
+        {
+            var vp = viewport.worldBound;
+            Vector2 vpCenter = new Vector2(vp.width * 0.5f, vp.height * 0.5f);
+
+            var s = contentViewContainer.resolvedStyle.scale;
+            Vector2 scale = new Vector2(s.value.x, s.value.y);
+
+            Vector2 pan = vpCenter - Vector2.Scale(contentPosition, scale);
+
+            UpdateViewTransform(
+                new Vector3(pan.x, pan.y, 0f),
+                new Vector3(scale.x, scale.y, 1f)
+            );
+        }).ExecuteLater(0);
+    }
+
 
     void OpenSearchWindow(NodeCreationContext context)
     {
         if (_searchWindow == null)
-        {
             _searchWindow = ScriptableObject.CreateInstance<StoryGraphSearchWindow>();
-        }
+
         _searchWindow.Initialize(this);
         SearchWindow.Open(new SearchWindowContext(context.screenMousePosition), _searchWindow);
     }
@@ -286,146 +362,315 @@ public sealed partial class StoryGraphView : GraphView
     #region Interact with nodes
     private async void OnMouseDown(MouseDownEvent evt)
     {
-        if (evt.button == 0)
+        // 1) Ctrl + ЛКМ -> создать группу под курсором
+        if (evt.button == 0 && evt.altKey)
         {
-            if (evt.target is Edge edge)
-            {
-                _currentClicks++;
-                if (_currentClicks == 2)
-                {
-                    CreateSeparatorNode(edge);
-                    _currentClicks = 0;
-                }
-                await Task.Delay(300);
-                _currentClicks = 0;
-            }
-            //Debug.Log("Current Clicks " + _currentClicks);
-            //Debug.Log("Target " + evt.target);
-        }
-    }
+            // координаты мыши в пространстве GraphView (панели)
+            Vector2 mousePosPanel = evt.mousePosition;
 
+            // переводим в координаты contentViewContainer (где живут ноды и группы)
+            Vector2 graphPos = contentViewContainer.WorldToLocal(mousePosPanel);
 
-    public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
-    {
-        base.BuildContextualMenu(evt);
-        if (evt.menu != null && evt.target is Edge edge)
-        {
-            evt.menu.AppendAction("Create Separator", e => {
-                CreateSeparatorNode(edge);
-            });
-        }
-    }
+            CreateGroup(graphPos, "New Group");
 
-    void CreateSeparatorNode(Edge edge)
-    {
-        StoryNodeView parentNodeView = edge.output.node as StoryNodeView;
-        StoryNodeView childNodeView = edge.input.node as StoryNodeView;
-        if (parentNodeView == null || childNodeView == null)
-        {
-            Debug.LogError("Невозможно создать SeparatorNode: родительская или дочерняя нода не найдены.");
+            // чтобы клик не ушёл дальше в драгер/выделение
+            evt.StopPropagation();
             return;
         }
 
-        Vector2 parentPos = parentNodeView.storyNode.nodePosition;
-        Vector2 childPos = childNodeView.storyNode.nodePosition;
+
+        if (evt.button == 0 && evt.target is Edge edge)
+        {
+            _currentClicks++;
+            if (_currentClicks == 2)
+            {
+                CreateSeparatorNode(edge);
+                _currentClicks = 0;
+            }
+            await Task.Delay(300);
+            _currentClicks = 0;
+        }
+    }
+
+    public void CustomValidateTransform() => ValidateTransform();
+    public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
+    {
+        base.BuildContextualMenu(evt);
+
+        var ve = evt.target as VisualElement;
+        var sticky = ve?.GetFirstAncestorOfType<StickyNote>();
+
+        // --- Спец-меню для StickyNote ---
+        if (sticky != null)
+        {
+            evt.menu.AppendSeparator();
+
+            evt.menu.AppendAction("Copy StickyNote", _ =>
+            {
+                // Копируем только этот стикер в буфер GraphView
+                var list = new List<GraphElement> { sticky };
+                var json = CutCopyOperation(list);
+                GUIUtility.systemCopyBuffer = json;
+            });
+
+            evt.menu.AppendAction("Paste StickyNote", _ =>
+            {
+                var json = GUIUtility.systemCopyBuffer;
+                if (!string.IsNullOrEmpty(json))
+                    PasteOperation("Paste", json);
+            });
+
+            evt.menu.AppendAction("Delete StickyNote", _ =>
+            {
+                DeleteElements(new[] { sticky }); // триггернет OnGraphChanged и данные тоже удалятся
+            });
+        }
+
+        // --- Остальное меню, что у тебя было ---
+        if (evt.menu != null && evt.target is Edge edge)
+            evt.menu.AppendAction("Create Separator", _ => CreateSeparatorNode(edge));
+
+        evt.menu.AppendAction("Create Group", _ =>
+        {
+            Vector2 mousePos = evt.localMousePosition;
+            Vector2 graphPos = contentViewContainer.WorldToLocal(mousePos);
+            CreateGroup(graphPos, "New Group");
+        });
+
+        evt.menu.AppendAction("Create StickyNote", _ =>
+        {
+            Vector2 mousePos = evt.localMousePosition;
+            Vector2 graphPos = contentViewContainer.WorldToLocal(mousePos);
+            CreateStickyNote(graphPos, "New Sticky Note");
+        });
+
+        evt.menu.AppendAction("Create Story Node Script", _ => NodeScriptGenerator.ShowWindow());
+    }
+
+
+    void CreateSeparatorNode(Edge edge)
+    {
+        var parentStoryNodeView = edge.output.node as StoryNodeView;
+        var childStoryNodeView = edge.input.node as StoryNodeView;
+        if (parentStoryNodeView == null || childStoryNodeView == null)
+        {
+            Debug.LogError("Cannot create SeparatorNode: parent or child node not found.");
+            return;
+        }
+
+        Vector2 parentPos = parentStoryNodeView.storyNode.nodePosition;
+        Vector2 childPos = childStoryNodeView.storyNode.nodePosition;
         Vector2 separatorPos = (parentPos + childPos) / 2;
 
-        // Локальное замыкание для обработки события создания SeparatorNode
         System.Action<StoryNode> onCreated = null;
         onCreated = (n) =>
         {
             if (n is SeparatorNode separatorNode)
             {
-                // Отписываемся, чтобы обработчик вызвался только один раз
                 _nodeCreated -= onCreated;
-                // Подключаем SeparatorNode к Edge
-                ConnectSeparator(edge, separatorNode);
+                EditorApplication.delayCall += () => ConnectSeparator(edge, separatorNode);
             }
         };
         _nodeCreated += onCreated;
 
-        // Создаем ноду SeparatorNode в указанной позиции
         CreateNode(typeof(SeparatorNode), separatorPos);
     }
 
     void ConnectSeparator(Edge edge, SeparatorNode separatorNode)
     {
-        if (edge == null || edge.output == null || edge.input == null)
-        {
-            //Debug.LogError("Edge or its connections are null.");
-            return;
-        }
+        if (edge == null || edge.output == null || edge.input == null) return;
 
-        StoryNodeView parentNodeView = edge.output.node as StoryNodeView;
-        StoryNodeView childNodeView = edge.input.node as StoryNodeView;
+        StoryNodeView parentStoryNodeView = edge.output.node as StoryNodeView;
+        StoryNode parentNode = parentStoryNodeView.storyNode;
 
-        if (parentNodeView == null || childNodeView == null)
-        {
-            //Debug.LogError("Edge nodes are not of type NodeView.");
-            return;
-        }
+        StoryNodeView childStoryNodeView = edge.input.node as StoryNodeView;
+        StoryNode childNode = childStoryNodeView.storyNode;
 
-        if (childNodeView.storyNode == null)
-        {
-            //Debug.LogError("Child node's StoryNode is null.");
-            return;
-        }
+        SeparatorNodeView separatorStoryNodeView = FindNodeView(separatorNode) as SeparatorNodeView;
 
-        int childId = childNodeView.storyNode.id;
+        separatorNode.childrenID.Add(childNode.id);
+        separatorNode.previousNodesCount++;
+        parentNode.childrenID.Add(separatorNode.id);
 
-        List<int> children = parentNodeView.GetChildrenList(childId);
-        if (children == null)
-        {
-            //Debug.LogWarning("Children list is null. Creating a new one.");
-            children = new List<int>();
-        }
+        parentNode.childrenID.Remove(childNode.id);
+        AddElement(parentStoryNodeView.output.ConnectTo(separatorStoryNodeView.input));
+        AddElement(separatorStoryNodeView.output.ConnectTo(edge.input));
+        RemoveElement(edge);
 
-        children.Remove(childId);
-        children.Add(separatorNode.id);
-
-        if (separatorNode != null)
-        {
-            separatorNode.childrenID.Add(childId);
-            separatorNode.previousNodesCount++;
-        }
-        else
-        {
-            Debug.LogError("SeparatorNode is null.");
-        }
-
-        PopulateView(storyGraph);
+        EditorUtility.SetDirty(_storyGraph);
     }
+
+
+    private void OnGroupTitleChanged(Group group, string newTitle)
+    {
+        if (!_groupMap.TryGetValue(group, out var groupData))
+            return;
+
+        groupData.title = newTitle;
+    }
+
+    public void OnElementsRemovedFromGroup(Group group, IEnumerable<GraphElement> elements)
+    {
+        if (!_groupMap.TryGetValue(group, out var data) || data == null)
+            return;
+
+        if (data.nodeGuids == null)
+            data.nodeGuids = new List<string>();
+
+        foreach (var el in elements)
+        {
+            if (el is StoryNodeView nodeView && nodeView.storyNode != null)
+            {
+                data.nodeGuids.Remove(nodeView.storyNode.guid);
+            }
+        }
+    }
+
+    public void OnElementsAddedToGroup(Group group, IEnumerable<GraphElement> elements)
+    {
+        if (!_groupMap.TryGetValue(group, out var data) || data == null)
+            return;
+
+        if (data.nodeGuids == null)
+            data.nodeGuids = new List<string>();
+
+        foreach (var el in elements)
+        {
+            if (el is StoryNodeView nodeView && nodeView.storyNode != null)
+            {
+                if (!data.nodeGuids.Contains(nodeView.storyNode.guid))
+                    data.nodeGuids.Add(nodeView.storyNode.guid);
+            }
+        }
+    }
+
+
+    public StickyNote CreateStickyNote(Vector2 pos, string title)
+    {
+        var stickyNote = new StickyNote();
+        stickyNote.title = title;
+        stickyNote.SetPosition(new Rect(pos, new Vector2(300, 200)));
+        stickyNote.theme = StickyNoteTheme.Classic;
+        stickyNote.fontSize = StickyNoteFontSize.Small;
+        AddElement(stickyNote);
+
+
+        if (storyGraph.stickyNoteDatas == null)
+            storyGraph.stickyNoteDatas = new List<StoryStickyNoteData>();
+
+        // Создаём модель
+        StoryStickyNoteData data = new StoryStickyNoteData()
+        {
+            guid = GUID.Generate().ToString(),
+            title = title,
+            position = stickyNote.GetPosition(),
+            guidGroupNode = currentGroupNode != null ? currentGroupNode.guid : "",
+            theme = StoryStickyNoteTheme.Classic,
+            fontSize = StoryStickyNoteFontSize.Small,
+        };
+
+        // Добавляем в ScriptableObject
+        storyGraph.stickyNoteDatas.Add(data);
+
+        // Сохраняем ссылку
+        _stickyNotesMap[stickyNote] = data;
+
+        HookStickyNoteEvents(stickyNote);
+
+
+        return stickyNote;
+    }
+    private void HookStickyNoteEvents(StickyNote stickyNote)
+    {
+        // 1) Заголовок / текст — можно вообще не через Label, а через событие:
+        stickyNote.RegisterCallback<StickyNoteChangeEvent>(evt =>
+        {
+            if (!_stickyNotesMap.TryGetValue(stickyNote, out var data))
+                return;
+
+            switch (evt.change)
+            {
+                case StickyNoteChange.Title:
+                    data.title = stickyNote.title;
+                    break;
+
+                case StickyNoteChange.Contents:
+                    data.description = stickyNote.contents;
+                    break;
+
+                case StickyNoteChange.Theme:
+                    data.theme = (StoryStickyNoteTheme)stickyNote.theme;
+                    break;
+
+                case StickyNoteChange.FontSize:
+                    data.fontSize = (StoryStickyNoteFontSize)stickyNote.fontSize;
+                    break;
+
+                case StickyNoteChange.Position:
+                    data.position = stickyNote.GetPosition();
+                    break;
+            }
+
+            EditorUtility.SetDirty(storyGraph);
+        });
+
+        // Если твой вариант с Label тебе нравится — можно оставить его,
+        // ничего не сломается. Просто этот колбэк уже покрывает всё.
+    }
+
+
+    public Group CreateGroup(Vector2 pos, string title)
+    {
+        var group = new Group();
+        group.title = title;
+        group.SetPosition(new Rect(pos, new Vector2(300, 200)));
+        AddElement(group);
+
+        if (storyGraph.groups == null)
+            storyGraph.groups = new List<StoryGroupData>();
+
+        // Создаём модель
+        StoryGroupData data = new StoryGroupData()
+        {
+            guid = GUID.Generate().ToString(),
+            title = title,
+            position = group.GetPosition(),
+            guidGroupNode = currentGroupNode != null ? currentGroupNode.guid : "",
+        };
+
+        // Добавляем в ScriptableObject
+        storyGraph.groups.Add(data);
+
+        // Сохраняем ссылку
+        _groupMap[group] = data;
+
+        return group;
+    }
+
 
     public void CreateNode(System.Type type, Vector2 position)
     {
-        StoryNode node = _storyGraph.CreateBaseNode(type, position);
+        var node = _storyGraph.CreateBaseNode(type, position);
         _temporaryNodes.Add(node);
         _nodeCreated?.Invoke(node);
-        CreateNodeView(node, position);
-        PopulateView(storyGraph);
+        CreateStoryNodeView(node, position);
 
         if (!_saveAssetsScheduled)
         {
             _saveAssetsScheduled = true;
             EditorApplication.delayCall += () =>
             {
-                // Сохраняем изменения
                 SaveChanges();
                 _saveAssetsScheduled = false;
             };
         }
-        return;
     }
-    void CreateNodeView(StoryNode node, Vector2 position)
-    {
-        if (node == null)
-        {
-            return;
-        }
 
-        // Динамическое создание NodeView через фабрику
-        StoryNodeView nodeView = CustomStoryNodeViewFactory.CreateNodeView(node);
-        // Установка позиции и добавление узла в граф
+    void CreateStoryNodeView(StoryNode node, Vector2 position)
+    {
+        if (node == null) return;
+
+        var nodeView = CustomStoryNodeViewFactory.CreateNodeView(node);
         Rect rect = new Rect(position, nodeView.GetPosition().size);
         nodeView.SetPosition(rect);
         nodeView.onNodeSelected = onNodeSelected;
@@ -439,276 +684,605 @@ public sealed partial class StoryGraphView : GraphView
         Vector2 localPosition = contentViewContainer.WorldToLocal(worldPosition);
         return localPosition;
     }
-    internal StoryNodeView FindNodeView(StoryNode node)
+
+    public StoryNodeView FindNodeView(StoryNode node)
     {
-        if (node == null)
-        {
-            return null;
-        }
+        if (node == null) return null;
         var nodeView = GetNodeByGuid(node.guid) as StoryNodeView;
         if (nodeView == null)
-        {
-            Debug.LogWarning($"NodeView not found for node with GUID: {node.guid} & {node.GetName()}");
-        }
+            Debug.LogWarning($"StoryNodeView not found for node with GUID: {node.guid} & {node.GetName()}");
         return nodeView;
     }
 
     public void UpdateNodesState()
     {
-        nodes.ForEach(node =>
+        nodes.ForEach(n =>
         {
-            StoryNodeView nodeView = node as StoryNodeView;
-            nodeView.UpdateCurrentState();
+            if (n is StoryNodeView nv) nv.UpdateCurrentState();
         });
     }
-
     #endregion
 
     #region Interact with GraphView
-    private void SetupSliderZoom()
-    {
-        Slider zoomSlider = window.root.Q<Slider>("Zoom");
-
-        zoomSlider.RegisterValueChangedCallback((v) =>
-        {
-            float newScale = Mathf.Clamp(v.newValue, zoomSlider.lowValue, zoomSlider.highValue);
-            viewTransform.scale = Vector3.one * newScale;
-            viewTransform.scale = Vector3.ClampMagnitude(viewTransform.scale, zoomSlider.highValue);
-
-            ValidateTransform();
-        });
-
-        // Для совместимости с зумом колесом мыши (не влияет на позицию)
-        RegisterCallback<WheelEvent>((e) =>
-        {
-            float scrollDelta = e.delta.y > 0 ? -0.1f : 0.1f;
-            zoomSlider.SetValueWithoutNotify(Mathf.Clamp(zoomSlider.value + scrollDelta, zoomSlider.lowValue, zoomSlider.highValue));
-        });
-    }
-
     private void OnUndoRedo()
     {
+        if (_storyGraph == null)
+            return;
+
+        // 1. После отката/повтора операции ассет уже в нужном состоянии.
+        //    Подтягиваем это состояние в наш кэш.
+        SyncTemporaryNodesFromAsset();
+
+        // 2. (опционально) чистим битые ссылки, если используешь CleanupNullNodes
+        CleanupNullNodes();
+
+        // 3. Пересобираем вьюху
         PopulateView(_storyGraph);
     }
-    // Метод для загрузки графа и инициализации временного списка нод
+
+
+
+
+
+    // Все ноды, относящиеся к текущей "области" (весь граф или конкретная группа)
+    private IEnumerable<StoryNode> GetScopeNodes(BaseGroupNode group)
+    {
+        if (_storyGraph == null) yield break;
+
+        if (group == null)
+        {
+            // Весь граф, но только ноды верхнего уровня (без groupNode)
+            foreach (var n in _storyGraph.nodes)
+            {
+                if (n != null && n.groupNode == null)
+                    yield return n;
+            }
+        }
+        else
+        {
+            foreach (var n in group.storyNodes)
+            {
+                if (n != null)
+                    yield return n;
+            }
+        }
+    }
+
+    // Считаем, сколько родителей у ноды в пределах этой области
+    private int CountParentsInScope(StoryNode node, IEnumerable<StoryNode> scopeNodes)
+    {
+        if (node == null) return 0;
+        int id = node.id;
+        int count = 0;
+
+        foreach (var n in scopeNodes)
+        {
+            if (n == null || n.childrenID == null) continue;
+            if (n.childrenID.Contains(id))
+                count++;
+        }
+
+        return count;
+    }
+
+
+    private RootNode FindRootNode(BaseGroupNode group)
+    {
+        if (_storyGraph == null) return null;
+
+        var scopeNodes = GetScopeNodes(group).ToList();
+        if (scopeNodes.Count == 0) return null;
+
+        var roots = scopeNodes.OfType<RootNode>().ToList();
+        if (roots.Count == 0) return null;
+
+        // 1. Считаем количество родителей в текущей области
+        // 2. Берём Root с МИНИМАЛЬНЫМ числом родителей (обычно 0 — настоящий вход)
+        // 3. Если несколько — берём визуально "верхний-левый"
+        var selected = roots
+            .Select(r => new
+            {
+                node = r,
+                parents = CountParentsInScope(r, scopeNodes)
+            })
+            .OrderBy(x => x.parents)                  // меньше родителей = лучше
+            .ThenBy(x => x.node.nodePosition.y)       // выше по Y
+            .ThenBy(x => x.node.nodePosition.x)       // левее по X
+            .First().node;
+
+        return selected;
+    }
+
+
+    private ReturnNode FindReturnNode(BaseGroupNode group)
+    {
+        if (_storyGraph == null) return null;
+
+        var scopeNodes = GetScopeNodes(group).ToList();
+        if (scopeNodes.Count == 0) return null;
+
+        var returns = scopeNodes.OfType<ReturnNode>().ToList();
+        if (returns.Count == 0) return null;
+
+        // 1. Сначала пробуем взять Return без детей (типичный "конец")
+        var noChildren = returns
+            .Where(r => r.childrenID == null || r.childrenID.Count == 0)
+            .ToList();
+
+        var candidates = noChildren.Count > 0 ? noChildren : returns;
+
+        // 2. Среди кандидатов берём ту, у которой МАКСИМУМ родителей (чаще всего "самый конец" цепочки)
+        // 3. Если всё равно несколько — берём визуально "нижнюю-правую"
+        var selected = candidates
+            .Select(r => new
+            {
+                node = r,
+                parents = CountParentsInScope(r, scopeNodes)
+            })
+            .OrderByDescending(x => x.parents)        // больше родителей = дальше по графу
+            .ThenByDescending(x => x.node.nodePosition.y) // ниже по Y
+            .ThenByDescending(x => x.node.nodePosition.x) // правее по X
+            .First().node;
+
+        return selected;
+    }
+
     public void LoadGraph(StoryGraph storyGraph, BaseGroupNode groupNode = null)
     {
         _storyGraph = storyGraph;
         _currentGroupNode = groupNode;
 
+        // тут при желании можно сначала почистить null-ы
+        CleanupNullNodes();
+
+        // а потом подтянуть кэш из ассета
+        SyncTemporaryNodesFromAsset();
+
         if (_currentGroupNode == null)
         {
-            // Работа с корневым уровнем
             _temporaryNodes = new List<StoryNode>(_storyGraph.nodes);
+
+            var autoRoot = FindRootNode(null);
+            if (autoRoot != null)
+                _storyGraph.rootNode = autoRoot;
 
             if (_storyGraph.rootNode == null)
             {
-                RootNode rootNode = _storyGraph.CreateNode(typeof(RootNode), Vector2.zero) as RootNode;
+                var rootNode = _storyGraph.CreateNode(typeof(RootNode), Vector2.zero) as RootNode;
                 _storyGraph.rootNode = rootNode;
                 _temporaryNodes.Add(rootNode);
             }
         }
         else
         {
-            // Работа с вложенным слоем
             _temporaryNodes = new List<StoryNode>(_currentGroupNode.storyNodes);
 
+            var autoRoot = FindRootNode(_currentGroupNode);
+            if (autoRoot != null)
+                _currentGroupNode.rootNode = autoRoot;
 
             if (_currentGroupNode.rootNode == null)
             {
-                RootNode rootNode = _storyGraph.CreateBaseNode(typeof(RootNode), Vector2.zero) as RootNode;
+                var rootNode = _storyGraph.CreateBaseNode(typeof(RootNode), Vector2.zero) as RootNode;
                 _currentGroupNode.rootNode = rootNode;
                 _temporaryNodes.Add(rootNode);
             }
+
+            var autoReturn = FindReturnNode(_currentGroupNode);
+            if (autoReturn != null)
+                _currentGroupNode.returnNode = autoReturn;
+
             if (_currentGroupNode.returnNode == null)
             {
-                ReturnNode returnNode = _storyGraph.CreateBaseNode(typeof(ReturnNode), Vector2.up * 280) as ReturnNode;
+                var returnNode = _storyGraph.CreateBaseNode(typeof(ReturnNode), Vector2.up * 280) as ReturnNode;
                 _currentGroupNode.returnNode = returnNode;
                 _temporaryNodes.Add(returnNode);
             }
         }
+
+
         SaveChanges(_currentGroupNode);
         PopulateView(_storyGraph);
+
+        CenterOnCurrentLayer();
     }
+
+
     internal void PopulateView(StoryGraph storyGraph)
     {
-        if (storyGraph != null)
+        if (storyGraph == null) return;
+
+        _storyGraph = storyGraph;
+
+        CleanupNullNodes();
+
+        Profiler.BeginSample("StoryGraphView Update(Populate View)");
+
+        graphViewChanged -= OnGraphChanged;
+        DeleteElements(graphElements);
+        graphViewChanged += OnGraphChanged;
+
+        _temporaryNodes.ForEach(n =>
         {
-            _storyGraph = storyGraph;
+            if (n != null)
+                CreateStoryNodeView(n, n.nodePosition);
+        });
 
-            Profiler.BeginSample("StoryGraphView Update(Populate View)");
+        for (int i = _temporaryNodes.Count - 1; i >= 0; i--)
+            if (_temporaryNodes[i] == null)
+                _temporaryNodes.RemoveAt(i);
+
+        _temporaryNodes.ForEach(n =>
+        {
+            n.storyGraph = storyGraph;
+            var nodeView = FindNodeView(n);
+            if (nodeView != null)
+                nodeView.ConnectNodes(this);
+
+            var children = _storyGraph.GetChildren(n);
+            for (int i = children.Count - 1; i >= 0; i--)
+                if (children[i] == null)
+                    children.RemoveAt(i);
+        });
+
+        Profiler.EndSample();
 
 
-            graphViewChanged -= OnGraphChanged;
-            DeleteElements(graphElements);
-            graphViewChanged += OnGraphChanged;
 
-            //Create nodes as NodeView type
-            _temporaryNodes.ForEach(n => {
-                if (n != null)
-                {
-                    CreateNodeView(n, n.nodePosition);
-                }
-            });
 
-            for (int i = _temporaryNodes.Count - 1; i >= 0; i--)
+        // === ГРУППЫ: пересобираем визуальные Group из данных графа ===
+        _groupMap.Clear();
+
+        if (_storyGraph.groups == null)
+            _storyGraph.groups = new List<StoryGroupData>();
+
+        // 1. Собираем карту guid -> StoryNodeView
+        var guidToStoryNodeView = new Dictionary<string, StoryNodeView>();
+        foreach (var n in nodes.ToList())
+        {
+            if (n is StoryNodeView nv && nv.storyNode != null)
+                guidToStoryNodeView[nv.storyNode.guid] = nv;
+        }
+
+        // 2. Создаём Group для каждой StoryGroupData
+        foreach (var groupData in _storyGraph.groups)
+        {
+            if (currentGroupNode != null && groupData.guidGroupNode != currentGroupNode.guid)
             {
-                if (_temporaryNodes[i] == null)
+                continue;
+            }
+            else if (currentGroupNode == null)
+            {
+                if (!string.IsNullOrEmpty(groupData.guidGroupNode))
                 {
-                    _temporaryNodes.RemoveAt(i);
+
+                    continue;
                 }
             }
 
-
-            //Create edges
-            _temporaryNodes.ForEach(n =>
+            var group = new Group
             {
-                n.storyGraph = storyGraph;
-                StoryNodeView nodeView = FindNodeView(n);
-                if (nodeView != null)
-                {
-                    nodeView?.ConnectNodes(this);
-                }
-                var children = _storyGraph.GetChildren(n);
-                for (int i = children.Count-1; i >= 0; i--)
-                {
-                    if (children[i] == null)
-                    {
-                        children.RemoveAt(i);
-                    }
-                }
-            });
+                title = groupData.title
+            };
+            group.SetPosition(groupData.position);
+            AddElement(group);
 
-            Profiler.EndSample();
+            _groupMap[group] = groupData;
+
+            if (groupData.nodeGuids == null)
+                continue;
+
+            // 3. Кладём ноды обратно в визуальную группу
+            foreach (var nodeGuid in groupData.nodeGuids)
+            {
+                if (guidToStoryNodeView.TryGetValue(nodeGuid, out var nodeView))
+                {
+                    group.AddElement(nodeView);
+                }
+            }
         }
+
+        // 2. Создаём StickyNote для каждой StoryStickyNoteData
+        foreach (var stickyNoteData in _storyGraph.stickyNoteDatas)
+        {
+            if (currentGroupNode != null && stickyNoteData.guidGroupNode != currentGroupNode.guid)
+            {
+                continue;
+            }
+            else if (currentGroupNode == null)
+            {
+                if (!string.IsNullOrEmpty(stickyNoteData.guidGroupNode))
+                {
+
+                    continue;
+                }
+            }
+
+            var stickyNote = new StickyNote
+            {
+                title = stickyNoteData.title,
+                contents = stickyNoteData.description
+            };
+            stickyNote.SetPosition(stickyNoteData.position);
+
+            stickyNote.theme = (StickyNoteTheme)stickyNoteData.theme;
+            stickyNote.fontSize = (StickyNoteFontSize)stickyNoteData.fontSize;
+            AddElement(stickyNote);
+
+            _stickyNotesMap[stickyNote] = stickyNoteData;
+
+
+            HookStickyNoteEvents(stickyNote);
+        }
+
     }
 
-    public void UnsubscribeGraphChange()
-    {
-        graphViewChanged -= OnGraphChanged;
-    }
+    public void UnsubscribeGraphChange() => graphViewChanged -= OnGraphChanged;
+
     private GraphViewChange OnGraphChanged(GraphViewChange graphViewChange)
     {
-        //Profiler.BeginSample("StoryGraphView Update");
-        if (graphViewChange.elementsToRemove != null)
-        {
-            // Создаем копию элементов для безопасной итерации
-            var elementsToRemoveCopy = new List<GraphElement>(graphViewChange.elementsToRemove);
+        bool dataChanged = false;
 
-            foreach (var elem in elementsToRemoveCopy)
+
+        if (graphViewChange.elementsToRemove != null && graphViewChange.elementsToRemove.Count > 0)
+        {
+            var copy = new List<GraphElement>(graphViewChange.elementsToRemove);
+            foreach (var elem in copy)
             {
-                //Profiler.BeginSample("StoryGraphView Update(Deletes Nodes)");
-                // Удаление узлов
                 if (elem is StoryNodeView nodeView)
                 {
                     if (nodeView.storyNode is BaseGroupNode groupNode)
-                    {
                         _storyGraph.DeleteGroupNode(groupNode);
-                    }
                     else
-                    {
                         _storyGraph.DeleteNode(nodeView.storyNode, nodeView.groupNode);
+
+
+
+                    if (_storyGraph.groups != null)
+                    {
+                        string guid = nodeView.storyNode.guid;
+                        foreach (var g in _storyGraph.groups)
+                            g.nodeGuids?.Remove(guid);
+                    }
+
+
+                    _temporaryNodes.Remove(nodeView.storyNode);
+                    dataChanged = true;
+                }
+
+                if (elem is Group group)
+                {
+                    // 1) вытаскиваем связанную модель
+                    if (_groupMap.TryGetValue(group, out var groupData) && groupData != null)
+                    {
+                        // 2) удаляем из ScriptableObject
+                        _storyGraph.groups.Remove(groupData);
+                        // 3) чистим из словаря
+                        _groupMap.Remove(group);
                     }
                 }
-                //Profiler.EndSample();
 
-                //Profiler.BeginSample("StoryGraphView Update(Deletes Edges)");
-                // Удаление связей (ребер)
+                if (elem is StickyNote stickyNote)
+                {
+                    // 1) вытаскиваем связанную модель
+                    if (_stickyNotesMap.TryGetValue(stickyNote, out var stickyNoteData) && stickyNoteData != null)
+                    {
+                        // 2) удаляем из ScriptableObject
+                        _storyGraph.stickyNoteDatas.Remove(stickyNoteData);
+                        // 3) чистим из словаря
+                        _stickyNotesMap.Remove(stickyNote);
+                    }
+                }
+
+
                 if (elem is Edge edge)
                 {
                     var parent = edge.output.node as StoryNodeView;
                     var child = edge.input.node as StoryNodeView;
-
-                    parent?.UnConnectToOutputNode(edge);
-                    child?.UnConnectToInputNode(edge);
+                    parent?.DisconnectFromOutputPort(edge);
+                    child?.DisconnectFromInputPort(edge);
+                    dataChanged = true;
                 }
-                EditorUtility.SetDirty(_storyGraph);
-               // Profiler.EndSample();
+
             }
         }
 
-        // Создание новых ребер
-        if (graphViewChange.edgesToCreate != null)
+        if (graphViewChange.edgesToCreate != null && graphViewChange.edgesToCreate.Count > 0)
         {
-            //Profiler.BeginSample("StoryGraphView Update(Create edges)");
             foreach (var edge in graphViewChange.edgesToCreate)
             {
                 var parent = edge.output.node as StoryNodeView;
                 var child = edge.input.node as StoryNodeView;
-
-                parent?.ConnectToOutputNode(edge);
+                parent?.ConnectFromOutputPort(edge);
                 child?.ConnectToInputNode(edge);
             }
-            EditorUtility.SetDirty(_storyGraph);
-            //Profiler.EndSample();
+            dataChanged = true;
         }
 
-        // Перемещение элементов
-        if (graphViewChange.movedElements != null)
+        if (graphViewChange.movedElements != null && graphViewChange.movedElements.Count > 0)
         {
-            //Profiler.BeginSample("StoryGraphView Update(Move Nodes)");
             foreach (var element in graphViewChange.movedElements)
             {
-                if (element is StoryNodeView nodeView)
+                if (element is StoryNodeView nodeView && nodeView.storyNode != null)
                 {
-                    nodeView.storyNode.storyGraph = _storyGraph;
+                    Undo.RecordObject(nodeView.storyNode, $"Change position {nodeView.storyNode.GetName()}");
+                    var pos = nodeView.GetPosition();
+                    nodeView.storyNode.nodePosition = new Vector2(pos.xMin, pos.yMin);
+
+                    EditorUtility.SetDirty(nodeView.storyNode);
                 }
-            }
-
-            //Profiler.EndSample();
-        }
-
-        PopulateView(_storyGraph);
-
-        // Планируем сохранение ассетов только если оно ещё не запланировано
-        if (graphViewChange.elementsToRemove != null || graphViewChange.edgesToCreate != null)
-        {
-            if (!_saveAssetsScheduled)
-            {
-                _saveAssetsScheduled = true;
-                EditorApplication.delayCall += () =>
+                if (element is Group group && _groupMap.TryGetValue(group, out var data) && data != null)
                 {
-                    // Сохраняем изменения
-                    SaveChanges();
-                    _saveAssetsScheduled = false;
-                };
+                    data.position = group.GetPosition();
+                }
+                if (element is StickyNote stickyNote && _stickyNotesMap.TryGetValue(stickyNote, out var stickyNoteData) && stickyNoteData != null)
+                {
+                    stickyNoteData.position = stickyNote.GetPosition();
+                }
+
             }
+            dataChanged = true;
         }
-        //Profiler.EndSample();
+
+
+        if (dataChanged)
+        {
+            EditorUtility.SetDirty(_storyGraph);
+
+            // пересобираем кэш из ассета, чтобы Undo/Redo не ломал голову
+            SyncTemporaryNodesFromAsset();
+
+            schedule.Execute(() =>
+            {
+                foreach (var n in nodes.ToList())
+                {
+                    if (n is StoryNodeView nv && nv.storyNode == null)
+                        RemoveElement(nv);
+                }
+
+                _temporaryNodes.RemoveAll(n => n == null);
+            }).ExecuteLater(0);
+        }
+
+
+
         return graphViewChange;
     }
-    // Метод для сохранения изменений в основной граф
     public void SaveChanges(BaseGroupNode baseGroupNode = null)
     {
-        if (baseGroupNode == null)
-        {
-            baseGroupNode = _currentGroupNode;
-        }
-        if (baseGroupNode == null)
-        {
-            // Обновляем основной список нод
-            _storyGraph.nodes = new List<StoryNode>(_temporaryNodes);
-        }
-        else
-        {
-            // Обновляем список нод в текущей группе
-            _currentGroupNode.storyNodes = new List<StoryNode>(_temporaryNodes);
-        }
+        if (baseGroupNode == null) baseGroupNode = _currentGroupNode;
 
-        // Отмечаем объект как измененный и сохраняем
+        _temporaryNodes.RemoveAll(n => n == null);
+
+        if (baseGroupNode == null)
+            _storyGraph.nodes = new List<StoryNode>(_temporaryNodes);
+        else
+            _currentGroupNode.storyNodes = new List<StoryNode>(_temporaryNodes);
+
+        // после присваивания списков ещё раз приводим asset в порядок
+        CleanupNullNodes();
+
         EditorUtility.SetDirty(_storyGraph);
-        
     }
+
+
 
     public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
     {
         return ports.ToList().Where(endPort =>
         {
 
-            return endPort.direction != startPort.direction && 
-                endPort.portType == startPort.portType &&
-                endPort.node != startPort.node;
+            return endPort.portType == endPort.portType &&
+                   endPort.direction != startPort.direction &&
+                   endPort.node != startPort.node;
         }).ToList();
     }
     #endregion
+
+
+    /// <summary>
+    /// Полная зачистка null-нод и битых childrenID в ScriptableObject графа.
+    /// </summary>
+    private void CleanupNullNodes()
+    {
+        if (_storyGraph == null)
+            return;
+
+        bool dirty = false;
+
+        // 1. Убираем null из общего списка нод графа
+        if (_storyGraph.nodes != null)
+        {
+            int removed = _storyGraph.nodes.RemoveAll(n => n == null);
+            if (removed > 0) dirty = true;
+        }
+
+        // 2. Убираем null из всех групп (storyNodes)
+        if (_storyGraph.nodes != null)
+        {
+            foreach (var groupNode in _storyGraph.nodes.OfType<BaseGroupNode>())
+            {
+                if (groupNode.storyNodes == null)
+                    continue;
+
+                int removed = groupNode.storyNodes.RemoveAll(n => n == null);
+                if (removed > 0) dirty = true;
+            }
+        }
+
+        // 3. Чистим childrenID от ссылок на несуществующие ноды
+        CleanupChildrenLists(null); // верхний уровень
+
+        if (_storyGraph.nodes != null)
+        {
+            foreach (var groupNode in _storyGraph.nodes.OfType<BaseGroupNode>())
+                CleanupChildrenLists(groupNode);        // внутри каждой группы
+        }
+
+        if (dirty)
+            EditorUtility.SetDirty(_storyGraph);
+    }
+
+    /// <summary>
+    /// Чистим childrenID в рамках конкретной "области" (весь граф или группа),
+    /// убирая id, для которых GetNodeByID возвращает null.
+    /// </summary>
+    private void CleanupChildrenLists(BaseGroupNode group)
+    {
+        var scopeNodes = GetScopeNodes(group).ToList();
+        if (scopeNodes.Count == 0)
+            return;
+
+        foreach (var node in scopeNodes)
+        {
+            if (node == null || node.childrenID == null)
+                continue;
+
+            for (int i = node.childrenID.Count - 1; i >= 0; i--)
+            {
+                int childId = node.childrenID[i];
+                var childNode = _storyGraph.GetNodeByID(childId, group);
+
+                if (childNode == null)
+                {
+                    node.childrenID.RemoveAt(i);
+                }
+            }
+        }
+    }
+    /// <summary>
+    /// Пересобирает _temporaryNodes из ассета (StoryGraph / текущей группы).
+    /// ScriptableObject = источник правды, _temporaryNodes = просто кэш.
+    /// </summary>
+    private void SyncTemporaryNodesFromAsset()
+    {
+        if (_storyGraph == null)
+        {
+            _temporaryNodes = new List<StoryNode>();
+            return;
+        }
+
+        List<StoryNode> source;
+
+        if (_currentGroupNode == null)
+        {
+            if (_storyGraph.nodes == null)
+                _storyGraph.nodes = new List<StoryNode>();
+
+            source = _storyGraph.nodes;
+        }
+        else
+        {
+            if (_currentGroupNode.storyNodes == null)
+                _currentGroupNode.storyNodes = new List<StoryNode>();
+
+            source = _currentGroupNode.storyNodes;
+        }
+
+        // Кладём в кэш только не-null ноды
+        _temporaryNodes = source
+            .Where(n => n != null)
+            .ToList();
+    }
+
 }

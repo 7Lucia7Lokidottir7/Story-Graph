@@ -29,9 +29,9 @@ namespace PG.StorySystem
                     m.previousNodesCount = input.connections.Count();
             };
         }
-        public override void UnConnectToInputNode(Edge edge)
+        public override void DisconnectFromInputPort(Edge edge)
         {
-            base.UnConnectToInputNode(edge);
+            base.DisconnectFromInputPort(edge);
             // откладываем на следующий «кадр» в редакторе
             EditorApplication.delayCall += () =>
             {

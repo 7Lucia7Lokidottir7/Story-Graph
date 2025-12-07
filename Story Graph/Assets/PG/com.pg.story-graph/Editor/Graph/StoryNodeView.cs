@@ -183,17 +183,17 @@ namespace PG.StorySystem
         public virtual void ConnectToInputNode(Edge edge)
         {
         }
-        public virtual void ConnectToOutputNode(Edge edge)
+        public virtual void ConnectFromOutputPort(Edge edge)
         {
             StoryNodeView parent = edge.output.node as StoryNodeView;
             StoryNodeView child = edge.input.node as StoryNodeView;
 
             storyNode.storyGraph.AddChild(parent.storyNode, child.storyNode);
         }
-        public virtual void UnConnectToInputNode(Edge edge)
+        public virtual void DisconnectFromInputPort(Edge edge)
         {
         }
-        public virtual void UnConnectToOutputNode(Edge edge)
+        public virtual void DisconnectFromOutputPort(Edge edge)
         {
             if (edge != null)
             {
