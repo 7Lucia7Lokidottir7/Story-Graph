@@ -16,8 +16,9 @@ namespace PG.StorySystem.Nodes
         [HideInInspector] 
         public List<StoryNode> storyNodes = new List<StoryNode>(), 
             currentNodes = new List<StoryNode>();
+        public Color color = Color.yellowNice;
 
-        public override Color colorNode => Color.yellowNice;
+        public override Color colorNode => color;
         protected override void OnEnd(StoryGraph storyGraph)
         {
         }

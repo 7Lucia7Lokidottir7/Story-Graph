@@ -1,3 +1,4 @@
+using PG.Localization;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -19,7 +20,7 @@ namespace PG.StorySystem.Nodes
         {
             if (_textObject != null)
             {
-                _textObject.text = text;
+                _textObject.text = _useLocalization ? LocalizationSystem.instance.GetLocalizedValue(textKey, text) : text;
             }
         }
         protected override void Init(StoryGraph storyGraph)
@@ -87,7 +88,7 @@ namespace PG.StorySystem.Nodes
             }
             else
             {
-                _textObject.text = text;
+                _textObject.text = _useLocalization ? LocalizationSystem.instance.GetLocalizedValue(textKey, text) : text;
                 TransitionToNextNodes(storyGraph);
             }
         }
@@ -95,7 +96,7 @@ namespace PG.StorySystem.Nodes
         {
             string newText = "";
 
-            newText = text;
+            newText = _useLocalization ? LocalizationSystem.instance.GetLocalizedValue(textKey, text) : text;
             _printedText = "";
             for (int i = 0; i < newText.Length; i++)
             {

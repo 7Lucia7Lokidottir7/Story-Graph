@@ -1,5 +1,12 @@
 {
   "dependencies": {
+    "com.pg.localization-system": {
+      "version": "https://github.com/7Lucia7Lokidottir7/unity-templates.git?path=/Templates/Assets/LocalizationSystem",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "ce4609fe54b66d822ad112712b451d0b3810f1e7"
+    },
     "com.unity.addressables": {
       "version": "2.6.0",
       "depth": 0,

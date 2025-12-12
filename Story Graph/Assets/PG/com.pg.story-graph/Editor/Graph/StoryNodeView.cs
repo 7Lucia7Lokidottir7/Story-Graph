@@ -40,6 +40,15 @@ namespace PG.StorySystem
 
             storyNode = node;
 
+            ApplyTextData(node);
+            //title = node.GetName() + " " + GetType().Name;
+            guid = node.guid;
+            viewDataKey = guid;
+            TopNodeColorStyle();
+
+        }
+        protected void ApplyTextData(StoryNode node)
+        {
             var field = AttributeHelper.GetFieldWithNodeTitleAttribute(node);
             if (field != null)
             {
@@ -51,18 +60,12 @@ namespace PG.StorySystem
                 title = node.GetName();
             }
 
-            //title = node.GetName() + " " + GetType().Name;
-            guid = node.guid;
-            viewDataKey = guid;
-            TopNodeColorStyle();
-
             _descriptionLabel = this.Q<Label>("description");
             _descriptionLabel.text = node.description;
             _nameNodeLabel = this.Q<Label>("nameNode-label");
             _nameNodeLabel.text = node.nameNode;
         }
-
-        private void TopNodeColorStyle()
+        protected void TopNodeColorStyle()
         {
             Color color = storyNode.colorNode;
 

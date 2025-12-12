@@ -9,6 +9,7 @@ namespace PG.StorySystem.Nodes
         private PlayableDirector _playableDirector;
         [SerializeField] private PlayableAsset _asset;
         [SerializeField] private bool _isWaitEndTimeline;
+        private float _time;
         protected override void Init(StoryGraph storyGraph)
         {
             base.Init(storyGraph);
@@ -21,6 +22,7 @@ namespace PG.StorySystem.Nodes
         protected override void OnStart(StoryGraph storyGraph)
         {
             _playableDirector.Play(_asset);
+            _time = Time.time;
             if (!_isWaitEndTimeline)
             {
                 TransitionToNextNodes(storyGraph);
@@ -28,9 +30,9 @@ namespace PG.StorySystem.Nodes
         }
         protected override void OnUpdate(StoryGraph storyGraph)
         {
-            if (_isWaitEndTimeline)
+            if (_isWaitEndTimeline && _playableDirector.playableAsset == _asset)
             {
-                if (_playableDirector.duration >= _asset.duration)
+                if (Time.time >= _time + _asset.duration)
                 {
                     TransitionToNextNodes(storyGraph);
                 }

@@ -21,6 +21,16 @@ namespace PG.StorySystem
                 _titleLabel.text = groupNode.nameGroup;
             };
         }
+        public override void OnSelected()
+        {
+            base.OnSelected();
+            TopNodeColorStyle();
+        }
+        public override void OnUnselected()
+        {
+            base.OnUnselected();
+            TopNodeColorStyle();
+        }
         public void OpenButton(StoryNode node)
         {
             BaseGroupNode groupNode = node as BaseGroupNode;

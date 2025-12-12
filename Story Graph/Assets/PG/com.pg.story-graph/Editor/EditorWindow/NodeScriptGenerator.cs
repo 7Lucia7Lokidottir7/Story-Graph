@@ -13,7 +13,7 @@ namespace PG.StorySystem.Graph
         private int nodeTypeIndex = 0;
         private readonly string[] nodeTypes = { "StoryNode", "ActionNode", "StructureNode", "InteractNode", "AudioNode", "WaitNode", "AnimationNode" }; // Можно добавить свои
 
-        [MenuItem("Tools/XReadyLab/Create Story Node Script")]
+        [MenuItem("Tools/PG/Create Story Node Script")]
         public static void ShowWindow()
         {
             var window = GetWindow<NodeScriptGenerator>("Create Node Script");
