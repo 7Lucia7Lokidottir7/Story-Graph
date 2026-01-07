@@ -36,6 +36,13 @@ namespace PG.StorySystem.Nodes
                 {
                     TransitionToNextNodes(storyGraph);
                 }
+                else
+                {
+                    if (_playableDirector.state != PlayState.Playing)
+                    {
+                        TransitionToNextNodes(storyGraph);
+                    }
+                }
             }
         }
     }
