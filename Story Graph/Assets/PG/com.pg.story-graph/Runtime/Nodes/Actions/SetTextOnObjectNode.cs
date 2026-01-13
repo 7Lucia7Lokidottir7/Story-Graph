@@ -15,6 +15,7 @@ namespace PG.StorySystem.Nodes
         private string _printedText;
         [SerializeField] private float _printTime = 0.01f;
 
+        private LocalizeText _localizedText;
 
         protected override void OnEnd(StoryGraph storyGraph)
         {
@@ -26,6 +27,9 @@ namespace PG.StorySystem.Nodes
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _textObject);
+
+            _textObject.TryGetComponent(out _localizedText);
+
             for (int i = 0; i < storyGraph.variables.Count; i++)
             {
                 string variableName = storyGraph.variables[i].variableName;
@@ -88,7 +92,23 @@ namespace PG.StorySystem.Nodes
             }
             else
             {
-                _textObject.text = _useLocalization ? LocalizationSystem.instance.GetLocalizedValue(textKey, text) : text;
+                if (LocalizationSystem.instance != null && _useLocalization)
+                {
+
+                    if (_localizedText != null)
+                    {
+                        _localizedText.key = textKey;
+                        _localizedText.Localize();
+                    }
+                    else
+                    {
+                        _textObject.text = _useLocalization ? LocalizationSystem.instance.GetLocalizedValue(textKey, text) : text; ;
+                    }
+                }
+                else
+                {
+                    _textObject.text = text;
+                }
                 TransitionToNextNodes(storyGraph);
             }
         }
@@ -96,8 +116,26 @@ namespace PG.StorySystem.Nodes
         {
             string newText = "";
 
-            newText = _useLocalization ? LocalizationSystem.instance.GetLocalizedValue(textKey, text) : text;
-            _printedText = "";
+
+            if (_useLocalization && LocalizationSystem.instance != null)
+            {
+                if (_localizedText != null)
+                {
+                    _localizedText.key = textKey;
+                    _localizedText.Localize();
+                }
+                else
+                {
+                    newText = LocalizationSystem.instance.GetLocalizedValue(textKey, text);
+                }
+            }
+            else
+            {
+                newText = text;
+            }
+
+
+                _printedText = "";
             for (int i = 0; i < newText.Length; i++)
             {
                 _printedText += newText[i];

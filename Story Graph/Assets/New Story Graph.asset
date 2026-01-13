@@ -103,6 +103,40 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   variableName: Test Int
+--- !u!114 &-744130097232771908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c77389988adb194383971786bc56b59, type: 3}
+  m_Name: WaitPressNode
+  m_EditorClassIdentifier: PG.StoryGraph::PG.StorySystem.Nodes.WaitPressNode
+  isVisibleInTemplate: 0
+  id: 15
+  guid: e6aa61b02b228ae4ebd7031d476e3ba6
+  nodePosition: {x: 633.9623, y: 355.0189}
+  storyGraph: {fileID: 11400000}
+  nameNode: 
+  childrenID: 
+  description: 
+  objectNameID: 
+  _actionProperty:
+    m_UseReference: 1
+    m_Action:
+      m_Name: Action Property
+      m_Type: 0
+      m_ExpectedControlType: 
+      m_Id: fe2b2c8a-8b87-458b-996b-b7b0faf116e2
+      m_Processors: 
+      m_Interactions: 
+      m_SingletonActionBindings: []
+      m_Flags: 0
+    m_Reference: {fileID: 0}
+  _actionPropertyModificators: []
 --- !u!114 &-336913393984522203
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -145,7 +179,8 @@ MonoBehaviour:
   - {fileID: -336913393984522203}
   - {fileID: 4083837169707816912}
   - {fileID: -2264078239669782353}
-  nextId: 14
+  - {fileID: -744130097232771908}
+  nextId: 15
   nodesID: 
   currentNodes: []
   runner: {fileID: 0}
@@ -156,6 +191,8 @@ MonoBehaviour:
   - {fileID: 8963430038860149229}
   - {fileID: -951468835849906412}
   - {fileID: 228577403052214252}
+  groups: []
+  stickyNoteDatas: []
 --- !u!114 &228577403052214252
 MonoBehaviour:
   m_ObjectHideFlags: 0

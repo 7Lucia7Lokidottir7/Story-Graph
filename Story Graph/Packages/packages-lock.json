@@ -5,7 +5,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "ce4609fe54b66d822ad112712b451d0b3810f1e7"
+      "hash": "a280c20e59de88867842a0c7e299cc6ecda5abb4"
     },
     "com.unity.addressables": {
       "version": "2.6.0",
@@ -94,7 +94,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.inputsystem": {
-      "version": "1.14.1",
+      "version": "1.15.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
