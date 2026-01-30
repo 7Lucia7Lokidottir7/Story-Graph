@@ -38,7 +38,7 @@ namespace PG.StorySystem
         [OnOpenAsset]
         public static bool OpenAsset(int instanceID)
         {
-            Object obj = EditorUtility.InstanceIDToObject(instanceID);
+            Object obj = EditorUtility.EntityIdToObject(instanceID);
             if (obj is StoryGraph)
             {
                 StoryGraph storyGraph = (StoryGraph)obj;

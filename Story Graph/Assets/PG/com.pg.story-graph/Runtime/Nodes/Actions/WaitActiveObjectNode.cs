@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 namespace PG.StorySystem.Nodes
 {
@@ -6,9 +7,7 @@ namespace PG.StorySystem.Nodes
         private Transform _transform;
         [SerializeField] private bool _activeValue;
         public override Color colorNode => Color.green;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
+        protected override bool useUpdate => true;
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _transform);
@@ -22,14 +21,18 @@ namespace PG.StorySystem.Nodes
             }
         }
 
-        protected override void OnUpdate(StoryGraph storyGraph)
+        protected override IEnumerator OnUpdate(StoryGraph storyGraph)
         {
-            if (_transform != null)
+            while (true)
             {
-                if (_transform.gameObject.activeInHierarchy == _activeValue)
+                if (_transform != null)
                 {
-                    TransitionToNextNodes(storyGraph);
+                    if (_transform.gameObject.activeInHierarchy == _activeValue)
+                    {
+                        TransitionToNextNodes(storyGraph);
+                    }
                 }
+                yield return null;
             }
         }
     }

@@ -10,9 +10,6 @@ namespace PG.StorySystem.Nodes
         public bool useMovement;
         public bool useRotation;
         public bool useScale;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
         protected override void Init(StoryGraph storyGraph)
         {
             base.Init(storyGraph);

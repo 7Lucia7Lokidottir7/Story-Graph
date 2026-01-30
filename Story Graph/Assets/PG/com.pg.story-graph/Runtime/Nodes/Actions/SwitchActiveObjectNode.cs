@@ -4,9 +4,6 @@ namespace PG.StorySystem.Nodes
     public class SwitchActiveObjectNode : ActionNode
     {
         private GameObject _gameObject;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _gameObject);
@@ -18,10 +15,6 @@ namespace PG.StorySystem.Nodes
                 _gameObject.SetActive(!_gameObject.activeSelf);
             }
             TransitionToNextNodes(storyGraph);
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
     }
 }

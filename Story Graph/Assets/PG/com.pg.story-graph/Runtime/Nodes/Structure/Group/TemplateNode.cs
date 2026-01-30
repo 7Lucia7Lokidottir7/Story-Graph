@@ -5,6 +5,5 @@ namespace PG.StorySystem.Nodes
     {
         public StoryGraph template;
         public bool importObjects;
-        public bool importVariables;
     }
 }

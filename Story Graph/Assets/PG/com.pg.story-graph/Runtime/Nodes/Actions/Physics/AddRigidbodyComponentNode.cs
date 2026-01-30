@@ -20,10 +20,6 @@ namespace PG.StorySystem.Nodes
             storyGraph.GetObject(objectNameID, out _transform);
         }
 
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
-
         protected override void OnStart(StoryGraph storyGraph)
         {
             if (_transform != null && !_transform.TryGetComponent(out Rigidbody component))
@@ -39,9 +35,6 @@ namespace PG.StorySystem.Nodes
                 rigidbody.constraints = _rigidbodyConstraints;
             }
             TransitionToNextNodes(storyGraph);
-        }
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
     }
 }

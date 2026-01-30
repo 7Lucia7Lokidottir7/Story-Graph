@@ -1,165 +1,5 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-7368581280434646423
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cddb2d84f354cc543bd2c59f990870e7, type: 3}
-  m_Name: RootNode
-  m_EditorClassIdentifier: 
-  isVisibleInTemplate: 0
-  id: 3
-  guid: 9341225c681c63847a24abdfbd5e9cf6
-  nodePosition: {x: 528.90564, y: 321.50943}
-  storyGraph: {fileID: 11400000}
-  nameNode: 
-  childrenID: 
-  description: 
---- !u!114 &-2904609132344082171
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c49f7fb40280ffb42a428a215d1ff37a, type: 3}
-  m_Name: AnimationNode
-  m_EditorClassIdentifier: 
-  isVisibleInTemplate: 0
-  id: 6
-  guid: 674be9ca028b3784c94a6c923cf2ba45
-  nodePosition: {x: 52.52832, y: 174.79245}
-  storyGraph: {fileID: 11400000}
-  nameNode: 
-  childrenID: 
-  description: 
-  objectNameID: Animator
-  parameter: 
-  parameterType: 0
-  floatValue: 0
-  intValue: 0
-  boolValue: 0
-  _waitEndAnimation: 0
---- !u!114 &-2685092284692744706
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cddb2d84f354cc543bd2c59f990870e7, type: 3}
-  m_Name: RootNode
-  m_EditorClassIdentifier: 
-  isVisibleInTemplate: 0
-  id: 2
-  guid: 10c956828d2e04840b601846dc7e11ef
-  nodePosition: {x: 528.90564, y: 321.50943}
-  storyGraph: {fileID: 11400000}
-  nameNode: 
-  childrenID: 
-  description: 
---- !u!114 &-2264078239669782353
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2497dd3d3f8aa7b4688295497738cc4a, type: 3}
-  m_Name: ActivateObjectsNode
-  m_EditorClassIdentifier: 
-  isVisibleInTemplate: 0
-  id: 11
-  guid: 373c597bdad3d1043aac0e47aab39e38
-  nodePosition: {x: 278.94336, y: 90.56604}
-  storyGraph: {fileID: 11400000}
-  nameNode: 
-  childrenID: 
-  description: 
-  objectNamesID:
-  - Animator
-  - Test
---- !u!114 &-951468835849906412
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc71cc0fcb7aa94489132b17de650269, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  variableName: Test Int
---- !u!114 &-744130097232771908
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c77389988adb194383971786bc56b59, type: 3}
-  m_Name: WaitPressNode
-  m_EditorClassIdentifier: PG.StoryGraph::PG.StorySystem.Nodes.WaitPressNode
-  isVisibleInTemplate: 0
-  id: 15
-  guid: e6aa61b02b228ae4ebd7031d476e3ba6
-  nodePosition: {x: 633.9623, y: 355.0189}
-  storyGraph: {fileID: 11400000}
-  nameNode: 
-  childrenID: 
-  description: 
-  objectNameID: 
-  _actionProperty:
-    m_UseReference: 1
-    m_Action:
-      m_Name: Action Property
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: fe2b2c8a-8b87-458b-996b-b7b0faf116e2
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    m_Reference: {fileID: 0}
-  _actionPropertyModificators: []
---- !u!114 &-336913393984522203
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c765275d9b980644acadae050639d47, type: 3}
-  m_Name: CheckPlayerDistanceNode
-  m_EditorClassIdentifier: 
-  isVisibleInTemplate: 0
-  id: 8
-  guid: cf2f403648c4dd147ab2db9275c0b6c9
-  nodePosition: {x: 13.5849, y: 306.56604}
-  storyGraph: {fileID: 11400000}
-  nameNode: 
-  childrenID: 
-  description: 
-  objectNameID: 
-  _checkType: 0
-  _targetDistance: 3
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,42 +11,16 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: dca4fd47846ca744c993b8dea9eabb30, type: 3}
   m_Name: New Story Graph
-  m_EditorClassIdentifier: 
-  rootNode: {fileID: 1212792829767615053}
+  m_EditorClassIdentifier: PG.StoryGraph::PG.StorySystem.StoryGraph
+  rootNode: {fileID: 363936484722905631}
   nodes:
-  - {fileID: 1212792829767615053}
-  - {fileID: -2904609132344082171}
-  - {fileID: -336913393984522203}
-  - {fileID: 4083837169707816912}
-  - {fileID: -2264078239669782353}
-  - {fileID: -744130097232771908}
-  nextId: 15
+  - {fileID: 363936484722905631}
+  - {fileID: 7084801866925565479}
+  nextId: 2
   nodesID: 
-  currentNodes: []
   runner: {fileID: 0}
-  objects:
-  - Animator
-  - Test
-  variables:
-  - {fileID: 8963430038860149229}
-  - {fileID: -951468835849906412}
-  - {fileID: 228577403052214252}
-  groups: []
-  stickyNoteDatas: []
---- !u!114 &228577403052214252
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d8f0c518430d4e40a662040c77e64ef, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  variableName: Test Float
---- !u!114 &1212792829767615053
+  objects: []
+--- !u!114 &363936484722905631
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -217,16 +31,16 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cddb2d84f354cc543bd2c59f990870e7, type: 3}
   m_Name: RootNode
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: PG.StoryGraph::PG.StorySystem.Nodes.RootNode
   isVisibleInTemplate: 0
   id: 1
-  guid: 3ede180f394918b439c2b3401b9e2532
-  nodePosition: {x: 16.30188, y: -25.960747}
+  guid: 280a9196aede2444a8c318ba742e8b37
+  nodePosition: {x: 0, y: 0}
   storyGraph: {fileID: 11400000}
   nameNode: 
-  childrenID: 06000000
+  childrenID: 02000000
   description: 
---- !u!114 &4083837169707816912
+--- !u!114 &7084801866925565479
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -235,51 +49,15 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9d018b298ab0a824fab3eda7f80adb43, type: 3}
-  m_Name: CheckDistanceObjectsNode
-  m_EditorClassIdentifier: 
+  m_Script: {fileID: 11500000, guid: f9f3aa5e405832f4697b6734eea2053e, type: 3}
+  m_Name: DebugLogNode
+  m_EditorClassIdentifier: PG.StoryGraph::PG.StorySystem.Nodes.DebugLogNode
   isVisibleInTemplate: 0
-  id: 9
-  guid: 17f3ecb056606224a880a4edb8c458f9
-  nodePosition: {x: 312.45282, y: 258.56604}
+  id: 2
+  guid: b149d02b2810e584f962128d9dce24b6
+  nodePosition: {x: 34.4151, y: 157.58492}
   storyGraph: {fileID: 11400000}
   nameNode: 
   childrenID: 
   description: 
-  objectNameID: Animator
-  targetObjectNameID: Test
-  _checkType: 0
-  _targetDistance: 0
---- !u!114 &8963430038860149229
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b909e78abc2ffd54cb0ca2276d8e242c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  variableName: Test Vector
---- !u!114 &8981610216774158740
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cddb2d84f354cc543bd2c59f990870e7, type: 3}
-  m_Name: RootNode
-  m_EditorClassIdentifier: 
-  isVisibleInTemplate: 0
-  id: 4
-  guid: ab4a5bf6f98cca24e864fe073e52150f
-  nodePosition: {x: 528.90564, y: 321.50943}
-  storyGraph: {fileID: 11400000}
-  nameNode: 
-  childrenID: 
-  description: 
+  _textLog: DEBUG TEST

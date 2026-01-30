@@ -20,9 +20,5 @@ namespace PG.StorySystem.Nodes
             }
             TransitionToNextNodes(scenarioGraph);
         }
-
-        protected override void OnUpdate(StoryGraph scenarioGraph)
-        {
-        }
     }
 }

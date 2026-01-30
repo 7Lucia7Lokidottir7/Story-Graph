@@ -5,9 +5,6 @@ namespace PG.StorySystem.Nodes
     public class StopAnythingNode : StructureNode
     {
         [SerializeField] private string[] _targetNameNodes;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
         protected override void Init(StoryGraph storyGraph)
         {
         }
@@ -22,10 +19,6 @@ namespace PG.StorySystem.Nodes
                 }
             }
             TransitionToNextNodes(storyGraph);
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
 
     }

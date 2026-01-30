@@ -9,7 +9,7 @@ namespace PG.StorySystem.Nodes
         {
             for (int i = 0; i < storyGraph.currentNodes.Count; i++)
             {
-                saveGraph.nodes.Add(storyGraph.currentNodes[i].id);
+                saveGraph.nodes.Add(storyGraph.currentNodes[i].storyNode.id);
             }
 
             string json = JsonUtility.ToJson(saveGraph);

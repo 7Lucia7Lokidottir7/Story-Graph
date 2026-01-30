@@ -10,17 +10,11 @@ namespace PG.StorySystem.Nodes
             base.Init(storyGraph);
             storyGraph.GetObject(objectNameID, out _playableDirector);
         }
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
 
         protected override void OnStart(StoryGraph storyGraph)
         {
             _playableDirector.Stop();
             TransitionToNextNodes(storyGraph);
-        }
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
     }
 }

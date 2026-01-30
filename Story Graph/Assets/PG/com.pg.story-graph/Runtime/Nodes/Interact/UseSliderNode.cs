@@ -23,10 +23,6 @@ namespace PG.StorySystem.Nodes
             storyGraph.GetObject(objectNameID, out _slider);
             _slider.onValueChanged.AddListener(OnValueChange);
         }
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-
-        }
         protected override void OnStart(StoryGraph storyGraph)
         {
         }

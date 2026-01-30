@@ -6,13 +6,6 @@ namespace PG.StorySystem.Nodes
 {
     public class UnloadLevelNode : LevelLoaderNode
     {
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-        }
         protected override IEnumerator LoadingScene()
         {
             if (SceneManager.GetSceneByName(_levelName).isLoaded)

@@ -4,6 +4,7 @@ namespace PG.StorySystem
 {
     using Nodes;
     using System.Collections;
+    using static PG.StorySystem.Nodes.StoryNode;
 
     [CreateAssetMenu(fileName ="New Story Graph", menuName ="PG/Story Graph")]
     public sealed class StoryGraph : ScriptableObject
@@ -22,22 +23,15 @@ namespace PG.StorySystem
         [HideInInspector] 
         public List<int> nodesID = new List<int>();
         [HideInInspector] 
-        public List<StoryNode> currentNodes = new List<StoryNode>();
+        public List<NodeState> currentNodes = new List<NodeState>();
         [HideInInspector] public StoryGraphRunner runner;
 
 
         public List<string> objects = new List<string>();
-        [HideInInspector]
-        public List<StoryVariable> variables = new List<StoryVariable>();
-        public Dictionary<string, StoryVariable> variablesDictionary = new Dictionary<string, StoryVariable>();
 
 
         public System.Action initialized;
 
-        [HideInInspector]
-        public List<StoryGroupData> groups = new();
-        [HideInInspector]
-        public List<StoryStickyNoteData> stickyNoteDatas = new();
 
         public void StopCoroutine(Coroutine routine)
         {
@@ -57,72 +51,57 @@ namespace PG.StorySystem
         {
             for (int i = 0; i < nodes.Count; i++)
             {
-                nodes[i].isStarted = false;
-                nodes[i].isEnded = false;
+                if (nodes[i] is BaseGroupNode baseGroupNode)
+                {
+                    for (int a = 0; a < baseGroupNode.state.currentNodes.Count; a++)
+                    {
+                        baseGroupNode.state.currentNodes[a] = new NodeState();
+                    }
+                }
+                nodes[i].state = new NodeState();
             }
         }
         public void Initialize()
         {
-            for (int i = 0; i < variables.Count; i++)
-            {
-                variablesDictionary.Add(variables[i].variableName, variables[i]);
-            }
-            currentNodes.Add(rootNode);
+            currentNodes.Add(rootNode.CreateState());
             rootNode.StartNode(this);
         }
         public void RemoveCurrentNode(StoryNode storyNode)
         {
-            if (currentNodes.Contains(storyNode))
+            if (currentNodes.Contains(storyNode.state))
             {
-                currentNodes.Remove(storyNode);
-            }
-        }
-        public void OnUpdate()
-        {
-            if (currentNodes.Count == 0) return;
-
-            for (int i = 0; i < currentNodes.Count; i++)
-            {
-                var currentNode = currentNodes[i];
-                if (currentNode == null)
-                {
-                    continue;
-                }
-                if (currentNode.isStarted && !currentNode.isEnded)
-                {
-                    currentNode.StandardUpdate(this);
-                }
+                currentNodes.Remove(storyNode.state);
             }
         }
 
         public void RestartAllNodes()
         {
-            foreach (StoryNode storyNode in currentNodes)
+            
+            foreach (NodeState storyNode in currentNodes)
             {
-                if (storyNode is BaseGroupNode baseGroupNode)
+                if (storyNode.storyNode is BaseGroupNode baseGroupNode)
                 {
-                    foreach (StoryNode subNode in baseGroupNode.currentNodes)
+                    foreach (NodeState subNode in baseGroupNode.state.currentNodes)
                     {
-                        if (!subNode.reinitNodeOnStart)
+                        if (!subNode.storyNode.reinitNodeOnStart)
                         {
                             continue;
                         }
-                        StartNode(subNode);
+                        StartNode(subNode.storyNode);
                     }
                 }
 
-                if (!storyNode.reinitNodeOnStart)
+                if (!storyNode.storyNode.reinitNodeOnStart)
                 {
                     continue;
                 }
-                StartNode(storyNode);
+                StartNode(storyNode.storyNode);
             }
         }
 
         public void StartNode(StoryNode storyNode)
         {
-            storyNode.isStarted = false;
-            storyNode.isEnded = false;
+            storyNode.state = new NodeState();
             storyNode.StartNode(this, storyNode.groupNode);
         }
 
@@ -140,68 +119,8 @@ namespace PG.StorySystem
         }
         #endregion
 
-        #region Variables
-        public StoryVariable GetVariable(string variableName)
-        {
-            runner.variables.TryGetValue(variableName, out StoryVariable variable);
-            return variable;
-        }
-        public object GetVariableValue(string variableName)
-        {
-            runner.variables.TryGetValue(variableName, out StoryVariable variable);
-            return variable.GetValue();
-        }
-        public void SetVariableValue(string variableName, object value)
-        {
-            runner.variables.TryGetValue(variableName, out StoryVariable variable);
-            variable.SetValue(value);
-        }
-        #endregion
 
-        public StoryGraph CloneGraph()
-        {
-            StoryGraph graph = Instantiate(this);
 
-            Dictionary<StoryNode, StoryNode> nodeMap = new Dictionary<StoryNode, StoryNode>();
-
-            // Создаем копии всех узлов и добавляем их в nodeMap
-            List<StoryNode> storyNodes = nodes.ConvertAll(node =>
-            {
-                var newNode = Instantiate(node);
-                nodeMap[node] = newNode;
-                nodeMap[node].baseNode = node;
-                return newNode;
-            });
-
-            graph.nodes = storyNodes;
-
-            // Обновляем связи между узлами
-            for (int i = 0; i < storyNodes.Count; i++)
-            {
-                var currentNode = storyNodes[i];
-                if (currentNode is BaseGroupNode groupNode)
-                {
-                    List<StoryNode> subStoryNodes = groupNode.storyNodes.ConvertAll(node =>
-                    {
-                        var subNode = Instantiate(node);
-                        nodeMap[node] = subNode;
-                        nodeMap[node].baseNode = node;
-                        return subNode;
-                    });
-
-                    groupNode.storyNodes = subStoryNodes;
-                }
-            }
-
-            // Устанавливаем rootNode и currentNodes
-            if (nodeMap.TryGetValue(rootNode, out var newRootNode))
-            {
-                graph.rootNode = newRootNode;
-            }
-            graph.currentNodes = currentNodes.ConvertAll(node => nodeMap.ContainsKey(node) ? nodeMap[node] : Instantiate(node));
-
-            return graph;
-        }
 
 
         #region Find Nodes
@@ -229,12 +148,12 @@ namespace PG.StorySystem
         {
             for (int i = 0; i < currentNodes.Count; i++)
             {
-                if (currentNodes[i].nameNode == nameNode)
+                if (currentNodes[i].storyNode.nameNode == nameNode)
                 {
-                    return currentNodes[i];
+                    return currentNodes[i].storyNode;
                 }
 
-                if (currentNodes[i] is BaseGroupNode groupNode)
+                if (currentNodes[i].storyNode is BaseGroupNode groupNode)
                 {
                     var foundNode = groupNode.FindCurrentNode(nameNode);
                     if (foundNode != null)

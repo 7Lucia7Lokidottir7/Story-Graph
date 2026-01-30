@@ -10,10 +10,6 @@ namespace PG.StorySystem.Nodes
         private int _endPreviousNodes = 0;  // Счётчик завершённых предыдущих нод
         private bool _isStarted = false;
 
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-            // Нет логики обновления для AndMergeNode
-        }
 
         public override void OnDublicate()
         {

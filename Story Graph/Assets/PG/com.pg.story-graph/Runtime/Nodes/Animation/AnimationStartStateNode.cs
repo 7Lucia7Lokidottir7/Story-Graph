@@ -11,9 +11,6 @@ namespace PG.StorySystem.Nodes
         {
             storyGraph.GetObject(objectNameID, out _animator);
         }
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
 
         protected override void OnStart(StoryGraph storyGraph)
         {

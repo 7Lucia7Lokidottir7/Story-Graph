@@ -17,10 +17,6 @@ namespace PG.StorySystem.Nodes
         {
             _button.onClick?.RemoveListener(OnClick);
         }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-        }
         protected override void OnStart(StoryGraph storyGraph)
         {
 

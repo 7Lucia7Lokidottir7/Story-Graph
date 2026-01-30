@@ -13,9 +13,6 @@ namespace PG.StorySystem.Nodes
         [HideInInspector] public float fogDensity = 0.01f;
         [HideInInspector] public float fogStartDistance;
         [HideInInspector] public float fogEndDistance = 300;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
 
         protected override void OnStart(StoryGraph storyGraph)
         {
@@ -35,10 +32,6 @@ namespace PG.StorySystem.Nodes
                 RenderSettings.fogEndDistance = fogEndDistance;
             }
             TransitionToNextNodes(storyGraph);
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
     }
 }

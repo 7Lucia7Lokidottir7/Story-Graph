@@ -33,13 +33,5 @@ namespace PG.StorySystem.Nodes
                     break;
             }
         }
-
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-        }
     }
 }

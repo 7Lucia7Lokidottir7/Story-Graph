@@ -12,10 +12,9 @@ namespace PG.StorySystem
         private StoryGraph _storyGraph;
         public StoryGraph currentStoryGraph => _storyGraph;
         public StoryGraph storyGraph => baseStoryGraph;
-        [field:SerializeField] public StoryGraph baseStoryGraph { get; private set; }
+        [field: SerializeField] public StoryGraph baseStoryGraph { get; private set; }
 
         internal Dictionary<string, GameObject> gameObjects = new Dictionary<string, GameObject>();
-        public Dictionary<string, StoryVariable> variables = new Dictionary<string, StoryVariable>();
 
         [SerializeField] private bool _isStartGraphOnAwake = true;
         ObjectElement[] objectElements;
@@ -53,17 +52,8 @@ namespace PG.StorySystem
             {
                 InitializeObjects();
                 _storyGraph = Instantiate(_storyGraph);
-                variables.Clear();
-                for (int i = 0; i < _storyGraph.variables.Count; i++)
-                {
-                    _storyGraph.variables[i] = Instantiate(_storyGraph.variables[i]);
-                    variables.Add(_storyGraph.variables[i].variableName, _storyGraph.variables[i]);
-                }
                 _storyGraph.runner = this;
-                //StoryNode rootNode = Instantiate(_storyGraph.rootNode);
 
-                //rootNode.Initialize(_storyGraph);
-                _storyGraph = _storyGraph.CloneGraph();
                 _storyGraph.Initialize();
             }
         }
@@ -86,28 +76,5 @@ namespace PG.StorySystem
                 }
             }
         }
-
-
-
-        // Update is called once per frame
-        void Update()
-        {
-            if (_storyGraph)
-            {
-                _storyGraph.OnUpdate();
-            }
-        }
-        #region Variables
-        public void SetVariableValue(string name, object value)
-        {
-            variables.TryGetValue(name, out StoryVariable variable);
-            variable.SetValue(value);
-        }
-        public object GetVariableValue(string name)
-        {
-            variables.TryGetValue(name, out StoryVariable variable);
-            return variable.GetValue();
-        }
     }
-    #endregion
 }

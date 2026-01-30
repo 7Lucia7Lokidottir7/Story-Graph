@@ -3,9 +3,6 @@ namespace PG.StorySystem.Nodes
 {
     public class DeactivateObjectsNode : BaseInteractionWithObjectsNode
     {
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
 
         protected override void OnStart(StoryGraph storyGraph)
         {
@@ -20,10 +17,6 @@ namespace PG.StorySystem.Nodes
                 }
             }
             TransitionToNextNodes(storyGraph);
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
     }
 }

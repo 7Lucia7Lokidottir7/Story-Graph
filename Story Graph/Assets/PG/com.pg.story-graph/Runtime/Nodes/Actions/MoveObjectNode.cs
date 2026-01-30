@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace PG.StorySystem.Nodes
 {
@@ -9,9 +10,7 @@ namespace PG.StorySystem.Nodes
         [SerializeField] private Vector3 _direction;
         [SerializeField] private float _speed;
         [SerializeField] private Space _space;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
+        protected override bool useUpdate => true;
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _transform);
@@ -20,9 +19,13 @@ namespace PG.StorySystem.Nodes
         {
         }
 
-        protected override void OnUpdate(StoryGraph storyGraph)
+        protected override IEnumerator OnUpdate(StoryGraph storyGraph)
         {
-            _transform.Translate(_direction * _speed * Time.deltaTime, _space);
+            while (true)
+            {
+                _transform.Translate(_direction * _speed * Time.deltaTime, _space);
+                yield return null;
+            }
         }
 
     }

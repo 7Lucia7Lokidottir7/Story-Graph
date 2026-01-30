@@ -13,22 +13,17 @@ namespace PG.StorySystem.Nodes
         public ReturnNode returnNode;
 
         public string nameGroup;
-        [HideInInspector] 
-        public List<StoryNode> storyNodes = new List<StoryNode>(), 
-            currentNodes = new List<StoryNode>();
+        [HideInInspector]
+        public List<StoryNode> storyNodes = new List<StoryNode>(); 
         public Color color = Color.yellowNice;
 
         public override Color colorNode => color;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
         public override void RestartNode(StoryGraph storyGraph)
         {
             base.RestartNode(storyGraph);
             if (rootNode != null)
             {
-                rootNode.isStarted = false;
-                rootNode.isEnded = false;
+                rootNode.state = new NodeState();
             }
         }
         protected override void OnStart(StoryGraph storyGraph)
@@ -37,24 +32,9 @@ namespace PG.StorySystem.Nodes
             {
                 rootNode = Instantiate(rootNode);
                 rootNode.StartNode(storyGraph, this);
-                currentNodes.Add(rootNode);
+                state.currentNodes.Add(rootNode.state);
             }
 
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-            for (int i = 0; i < currentNodes.Count; i++)
-            {
-                if (currentNodes[i] != null)
-                {
-                    var currentNode = currentNodes[i];
-                    if (currentNode.isStarted && !currentNode.isEnded)
-                    {
-                        currentNode.StandardUpdate(storyGraph);
-                    }
-                }
-            }
         }
         public void EndGroup(StoryGraph storyGraph)
         {
@@ -62,14 +42,14 @@ namespace PG.StorySystem.Nodes
         }
         public StoryNode FindCurrentNode(string nameNode)
         {
-            for (int i = 0; i < currentNodes.Count; i++)
+            for (int i = 0; i < state.currentNodes.Count; i++)
             {
-                if (currentNodes[i].nameNode == nameNode)
+                if (state.currentNodes[i].storyNode.nameNode == nameNode)
                 {
-                    return currentNodes[i];
+                    return state.currentNodes[i].storyNode;
                 }
 
-                if (currentNodes[i] is BaseGroupNode groupNode)
+                if (state.currentNodes[i].storyNode is BaseGroupNode groupNode)
                 {
                     var foundNode = groupNode.FindCurrentNode(nameNode);
                     if (foundNode != null)

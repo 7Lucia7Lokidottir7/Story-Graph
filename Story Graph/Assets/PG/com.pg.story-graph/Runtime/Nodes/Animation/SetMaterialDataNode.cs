@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace PG.StorySystem.Nodes
 {
@@ -19,7 +20,6 @@ namespace PG.StorySystem.Nodes
         [HideInInspector] public bool useLerp;
         [HideInInspector] public float duration;
 
-        private float _startTime;
 
         // Переменные для начальных значений
         private float _startFloat;
@@ -28,9 +28,7 @@ namespace PG.StorySystem.Nodes
         private Vector3 _startVector3;
         private Vector4 _startVector4;
 
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
+        protected override bool useUpdate => true;
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _renderer);
@@ -38,8 +36,6 @@ namespace PG.StorySystem.Nodes
         }
         protected override void OnStart(StoryGraph storyGraph)
         {
-
-            _startTime = Time.time;
 
             if (!useLerp)
             {
@@ -70,42 +66,47 @@ namespace PG.StorySystem.Nodes
             }
         }
 
-        protected override void OnUpdate(StoryGraph storyGraph)
+        protected override IEnumerator OnUpdate(StoryGraph storyGraph)
         {
-            if (useLerp)
+            float startTime = Time.time;
+            while (true)
             {
-                float elapsedTime = Time.time - _startTime;
-
-                if (elapsedTime < duration)
+                if (useLerp)
                 {
-                    float lerpFactor = elapsedTime / duration;
+                    float elapsedTime = Time.time - startTime;
 
-                    // Lerp от начального значения к целевому значению
-                    switch (parameterType)
+                    if (elapsedTime < duration)
                     {
-                        case ParameterType.Float:
-                            _material.SetFloat(_parameter, Mathf.Lerp(_startFloat, floatValue, lerpFactor));
-                            break;
-                        case ParameterType.Color:
-                            _material.SetColor(_parameter, Color.Lerp(_startColor, colorValue, lerpFactor));
-                            break;
-                        case ParameterType.Vector2:
-                            _material.SetVector(_parameter, Vector2.Lerp(_startVector2, vector2Value, lerpFactor));
-                            break;
-                        case ParameterType.Vector3:
-                            _material.SetVector(_parameter, Vector3.Lerp(_startVector3, vector3Value, lerpFactor));
-                            break;
-                        case ParameterType.Vector4:
-                            _material.SetVector(_parameter, Vector4.Lerp(_startVector4, vector4Value, lerpFactor));
-                            break;
+                        float lerpFactor = elapsedTime / duration;
+
+                        // Lerp от начального значения к целевому значению
+                        switch (parameterType)
+                        {
+                            case ParameterType.Float:
+                                _material.SetFloat(_parameter, Mathf.Lerp(_startFloat, floatValue, lerpFactor));
+                                break;
+                            case ParameterType.Color:
+                                _material.SetColor(_parameter, Color.Lerp(_startColor, colorValue, lerpFactor));
+                                break;
+                            case ParameterType.Vector2:
+                                _material.SetVector(_parameter, Vector2.Lerp(_startVector2, vector2Value, lerpFactor));
+                                break;
+                            case ParameterType.Vector3:
+                                _material.SetVector(_parameter, Vector3.Lerp(_startVector3, vector3Value, lerpFactor));
+                                break;
+                            case ParameterType.Vector4:
+                                _material.SetVector(_parameter, Vector4.Lerp(_startVector4, vector4Value, lerpFactor));
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        // Устанавливаем окончательное значение и переходим к следующему узлу
+                        SetMaterialParameter();
+                        TransitionToNextNodes(storyGraph);
                     }
                 }
-                else
-                {
-                    // Устанавливаем окончательное значение и переходим к следующему узлу
-                    SetMaterialParameter();
-                    TransitionToNextNodes(storyGraph);
-                }
+                yield return null;
             }
         }
 

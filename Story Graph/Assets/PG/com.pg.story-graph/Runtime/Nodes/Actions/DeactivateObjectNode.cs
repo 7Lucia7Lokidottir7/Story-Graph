@@ -6,9 +6,6 @@ namespace PG.StorySystem.Nodes
         private Transform _transform;
 
         public override Color colorNode => Color.green;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _transform);
@@ -20,10 +17,6 @@ namespace PG.StorySystem.Nodes
                 _transform.gameObject.SetActive(false);
             }
             TransitionToNextNodes(storyGraph);
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
     }
 }

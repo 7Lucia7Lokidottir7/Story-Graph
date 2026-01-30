@@ -12,8 +12,5 @@ namespace PG.StorySystem.Nodes
         {
             _objectElement.onTriggerExited += CheckTrigger;
         }
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-        }
     }
 }

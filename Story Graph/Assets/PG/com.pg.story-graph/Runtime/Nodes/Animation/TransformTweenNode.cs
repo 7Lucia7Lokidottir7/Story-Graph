@@ -14,8 +14,16 @@ namespace PG.StorySystem.Nodes
         public bool useMovement = true;
         public bool useRotation;
         public bool useScale;
-        private Coroutine _coroutine;
-        private IEnumerator MoveTweenEnumerator(StoryGraph storyGraph)
+        protected override void Init(StoryGraph storyGraph)
+        {
+            storyGraph.GetObject(objectNameID, out _transform);
+            storyGraph.GetObject(targetObjectNameID, out _targetTransform);
+        }
+
+        protected override void OnStart(StoryGraph storyGraph)
+        {
+        }
+        protected override IEnumerator OnUpdate(StoryGraph storyGraph)
         {
             float elapsedTime = 0f;
 
@@ -63,27 +71,6 @@ namespace PG.StorySystem.Nodes
             }
 
             TransitionToNextNodes(storyGraph);
-        }
-
-
-        protected override void Init(StoryGraph storyGraph)
-        {
-            storyGraph.GetObject(objectNameID, out _transform);
-            storyGraph.GetObject(targetObjectNameID, out _targetTransform);
-        }
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-            storyGraph.StopCoroutine(_coroutine);
-            _coroutine = null;
-        }
-
-        protected override void OnStart(StoryGraph storyGraph)
-        {
-            _coroutine = storyGraph.StartCoroutine(MoveTweenEnumerator(storyGraph));
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
     }
 }

@@ -96,16 +96,6 @@ namespace PG.StorySystem.NodesEditor
                 var newList = _templateNode.template.objects.Where(o => !_templateNode.storyGraph.objects.Contains(o));
                 _templateNode.storyGraph.objects.AddRange(newList);
             }
-            if (_templateNode.importVariables)
-            {
-                List<StoryVariable> newList = _templateNode.template.variables.Where(v => !_templateNode.storyGraph.variables.Contains(v)) as List<StoryVariable>;
-                for (int i = 0; i < newList.Count(); i++)
-                {
-                    newList[i] = Instantiate(newList[i]);
-                    AssetDatabase.AddObjectToAsset(newList[i], _templateNode.storyGraph);
-                }
-                _templateNode.storyGraph.variables.AddRange(newList);
-            }
         }
         private void PasteOperation()
         {

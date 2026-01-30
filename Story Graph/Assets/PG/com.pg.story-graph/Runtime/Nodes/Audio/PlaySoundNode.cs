@@ -38,9 +38,5 @@ namespace PG.StorySystem.Nodes
         {
             _audioSource.volume = _standardVolume;
         }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-        }
     }
 }

@@ -9,12 +9,6 @@ namespace PG.StorySystem.Nodes
     {
         [SerializeField] private bool _isAdditiveLoad = true;
         [SerializeField] private bool _setActiveScene = true;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-        }
         protected override IEnumerator LoadingScene()
         {
             if (!SceneManager.GetSceneByName(_levelName).isLoaded)

@@ -8,9 +8,6 @@ namespace PG.StorySystem.Nodes
         private VFXInvoker _vfxInvoker;
         [SerializeField] private string _nameVFX;
         [SerializeField] private bool _clearParticles;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
         protected override void Init(StoryGraph storyGraph)
         {
 
@@ -25,10 +22,6 @@ namespace PG.StorySystem.Nodes
                 visualEffect?.Reinit();
             }
             TransitionToNextNodes(storyGraph);
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
     }
 }

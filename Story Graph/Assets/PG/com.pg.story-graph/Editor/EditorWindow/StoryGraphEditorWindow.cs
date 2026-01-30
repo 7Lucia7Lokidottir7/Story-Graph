@@ -93,11 +93,9 @@ namespace PG.StorySystem
             layerButton.clicked += () => {
                 graphView.LoadGraph(storyGraph);
                 toolbarBreadcrumbs.Clear();
-                graphView.viewTransform.position = storyGraph.rootNode.nodePosition;
-                //graphView.PopulateView(storyGraph);
+                graphView.contentContainer.resolvedStyle.translate.Set(storyGraph.rootNode.nodePosition.x, storyGraph.rootNode.nodePosition.y, 0);
             };
 
-            //graphView.window = this;
         }
 
         private void SetupStyles()

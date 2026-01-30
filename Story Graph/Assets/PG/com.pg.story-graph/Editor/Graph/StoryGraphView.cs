@@ -33,8 +33,6 @@ public sealed partial class StoryGraphView : GraphView
     [NonSerialized] private List<StoryNode> _temporaryNodes = new List<StoryNode>();
     private BaseGroupNode _currentGroupNode;
 
-    private Dictionary<Group, StoryGroupData> _groupMap = new();
-    private Dictionary<StickyNote, StoryStickyNoteData> _stickyNotesMap = new();
 
     private int _currentClicks = 0;
 
@@ -46,7 +44,6 @@ public sealed partial class StoryGraphView : GraphView
     private class ClipboardNodes
     {
         public List<StoryNode> copiedNodes = new List<StoryNode>();
-        public List<StoryStickyNoteData> copiedStickyNotes = new List<StoryStickyNoteData>();
     }
 
     private event System.Action<StoryNode> _nodeCreated = default;
@@ -86,10 +83,6 @@ public sealed partial class StoryGraphView : GraphView
 
         serializeGraphElements += CutCopyOperation;
         unserializeAndPaste += PasteOperation;
-
-        elementsAddedToGroup += OnElementsAddedToGroup;
-        elementsRemovedFromGroup += OnElementsRemovedFromGroup;
-        groupTitleChanged += OnGroupTitleChanged;
 
         this.RegisterCallback<MouseDownEvent>(OnMouseDown, TrickleDown.TrickleDown);
 
@@ -362,21 +355,6 @@ public sealed partial class StoryGraphView : GraphView
     #region Interact with nodes
     private async void OnMouseDown(MouseDownEvent evt)
     {
-        // 1) Ctrl + ЛКМ -> создать группу под курсором
-        if (evt.button == 0 && evt.altKey)
-        {
-            // координаты мыши в пространстве GraphView (панели)
-            Vector2 mousePosPanel = evt.mousePosition;
-
-            // переводим в координаты contentViewContainer (где живут ноды и группы)
-            Vector2 graphPos = contentViewContainer.WorldToLocal(mousePosPanel);
-
-            CreateGroup(graphPos, "New Group");
-
-            // чтобы клик не ушёл дальше в драгер/выделение
-            evt.StopPropagation();
-            return;
-        }
 
 
         if (evt.button == 0 && evt.target is Edge edge)
@@ -429,20 +407,6 @@ public sealed partial class StoryGraphView : GraphView
         // --- Остальное меню, что у тебя было ---
         if (evt.menu != null && evt.target is Edge edge)
             evt.menu.AppendAction("Create Separator", _ => CreateSeparatorNode(edge));
-
-        evt.menu.AppendAction("Create Group", _ =>
-        {
-            Vector2 mousePos = evt.localMousePosition;
-            Vector2 graphPos = contentViewContainer.WorldToLocal(mousePos);
-            CreateGroup(graphPos, "New Group");
-        });
-
-        evt.menu.AppendAction("Create StickyNote", _ =>
-        {
-            Vector2 mousePos = evt.localMousePosition;
-            Vector2 graphPos = contentViewContainer.WorldToLocal(mousePos);
-            CreateStickyNote(graphPos, "New Sticky Note");
-        });
 
         evt.menu.AppendAction("Create Story Node Script", _ => NodeScriptGenerator.ShowWindow());
     }
@@ -501,151 +465,7 @@ public sealed partial class StoryGraphView : GraphView
     }
 
 
-    private void OnGroupTitleChanged(Group group, string newTitle)
-    {
-        if (!_groupMap.TryGetValue(group, out var groupData))
-            return;
 
-        groupData.title = newTitle;
-    }
-
-    public void OnElementsRemovedFromGroup(Group group, IEnumerable<GraphElement> elements)
-    {
-        if (!_groupMap.TryGetValue(group, out var data) || data == null)
-            return;
-
-        if (data.nodeGuids == null)
-            data.nodeGuids = new List<string>();
-
-        foreach (var el in elements)
-        {
-            if (el is StoryNodeView nodeView && nodeView.storyNode != null)
-            {
-                data.nodeGuids.Remove(nodeView.storyNode.guid);
-            }
-        }
-    }
-
-    public void OnElementsAddedToGroup(Group group, IEnumerable<GraphElement> elements)
-    {
-        if (!_groupMap.TryGetValue(group, out var data) || data == null)
-            return;
-
-        if (data.nodeGuids == null)
-            data.nodeGuids = new List<string>();
-
-        foreach (var el in elements)
-        {
-            if (el is StoryNodeView nodeView && nodeView.storyNode != null)
-            {
-                if (!data.nodeGuids.Contains(nodeView.storyNode.guid))
-                    data.nodeGuids.Add(nodeView.storyNode.guid);
-            }
-        }
-    }
-
-
-    public StickyNote CreateStickyNote(Vector2 pos, string title)
-    {
-        var stickyNote = new StickyNote();
-        stickyNote.title = title;
-        stickyNote.SetPosition(new Rect(pos, new Vector2(300, 200)));
-        stickyNote.theme = StickyNoteTheme.Classic;
-        stickyNote.fontSize = StickyNoteFontSize.Small;
-        AddElement(stickyNote);
-
-
-        if (storyGraph.stickyNoteDatas == null)
-            storyGraph.stickyNoteDatas = new List<StoryStickyNoteData>();
-
-        // Создаём модель
-        StoryStickyNoteData data = new StoryStickyNoteData()
-        {
-            guid = GUID.Generate().ToString(),
-            title = title,
-            position = stickyNote.GetPosition(),
-            guidGroupNode = currentGroupNode != null ? currentGroupNode.guid : "",
-            theme = StoryStickyNoteTheme.Classic,
-            fontSize = StoryStickyNoteFontSize.Small,
-        };
-
-        // Добавляем в ScriptableObject
-        storyGraph.stickyNoteDatas.Add(data);
-
-        // Сохраняем ссылку
-        _stickyNotesMap[stickyNote] = data;
-
-        HookStickyNoteEvents(stickyNote);
-
-
-        return stickyNote;
-    }
-    private void HookStickyNoteEvents(StickyNote stickyNote)
-    {
-        // 1) Заголовок / текст — можно вообще не через Label, а через событие:
-        stickyNote.RegisterCallback<StickyNoteChangeEvent>(evt =>
-        {
-            if (!_stickyNotesMap.TryGetValue(stickyNote, out var data))
-                return;
-
-            switch (evt.change)
-            {
-                case StickyNoteChange.Title:
-                    data.title = stickyNote.title;
-                    break;
-
-                case StickyNoteChange.Contents:
-                    data.description = stickyNote.contents;
-                    break;
-
-                case StickyNoteChange.Theme:
-                    data.theme = (StoryStickyNoteTheme)stickyNote.theme;
-                    break;
-
-                case StickyNoteChange.FontSize:
-                    data.fontSize = (StoryStickyNoteFontSize)stickyNote.fontSize;
-                    break;
-
-                case StickyNoteChange.Position:
-                    data.position = stickyNote.GetPosition();
-                    break;
-            }
-
-            EditorUtility.SetDirty(storyGraph);
-        });
-
-        // Если твой вариант с Label тебе нравится — можно оставить его,
-        // ничего не сломается. Просто этот колбэк уже покрывает всё.
-    }
-
-
-    public Group CreateGroup(Vector2 pos, string title)
-    {
-        var group = new Group();
-        group.title = title;
-        group.SetPosition(new Rect(pos, new Vector2(300, 200)));
-        AddElement(group);
-
-        if (storyGraph.groups == null)
-            storyGraph.groups = new List<StoryGroupData>();
-
-        // Создаём модель
-        StoryGroupData data = new StoryGroupData()
-        {
-            guid = GUID.Generate().ToString(),
-            title = title,
-            position = group.GetPosition(),
-            guidGroupNode = currentGroupNode != null ? currentGroupNode.guid : "",
-        };
-
-        // Добавляем в ScriptableObject
-        storyGraph.groups.Add(data);
-
-        // Сохраняем ссылку
-        _groupMap[group] = data;
-
-        return group;
-    }
 
 
     public void CreateNode(System.Type type, Vector2 position)
@@ -926,95 +746,6 @@ public sealed partial class StoryGraphView : GraphView
         });
 
         Profiler.EndSample();
-
-
-
-
-        // === ГРУППЫ: пересобираем визуальные Group из данных графа ===
-        _groupMap.Clear();
-
-        if (_storyGraph.groups == null)
-            _storyGraph.groups = new List<StoryGroupData>();
-
-        // 1. Собираем карту guid -> StoryNodeView
-        var guidToStoryNodeView = new Dictionary<string, StoryNodeView>();
-        foreach (var n in nodes.ToList())
-        {
-            if (n is StoryNodeView nv && nv.storyNode != null)
-                guidToStoryNodeView[nv.storyNode.guid] = nv;
-        }
-
-        // 2. Создаём Group для каждой StoryGroupData
-        foreach (var groupData in _storyGraph.groups)
-        {
-            if (currentGroupNode != null && groupData.guidGroupNode != currentGroupNode.guid)
-            {
-                continue;
-            }
-            else if (currentGroupNode == null)
-            {
-                if (!string.IsNullOrEmpty(groupData.guidGroupNode))
-                {
-
-                    continue;
-                }
-            }
-
-            var group = new Group
-            {
-                title = groupData.title
-            };
-            group.SetPosition(groupData.position);
-            AddElement(group);
-
-            _groupMap[group] = groupData;
-
-            if (groupData.nodeGuids == null)
-                continue;
-
-            // 3. Кладём ноды обратно в визуальную группу
-            foreach (var nodeGuid in groupData.nodeGuids)
-            {
-                if (guidToStoryNodeView.TryGetValue(nodeGuid, out var nodeView))
-                {
-                    group.AddElement(nodeView);
-                }
-            }
-        }
-
-        // 2. Создаём StickyNote для каждой StoryStickyNoteData
-        foreach (var stickyNoteData in _storyGraph.stickyNoteDatas)
-        {
-            if (currentGroupNode != null && stickyNoteData.guidGroupNode != currentGroupNode.guid)
-            {
-                continue;
-            }
-            else if (currentGroupNode == null)
-            {
-                if (!string.IsNullOrEmpty(stickyNoteData.guidGroupNode))
-                {
-
-                    continue;
-                }
-            }
-
-            var stickyNote = new StickyNote
-            {
-                title = stickyNoteData.title,
-                contents = stickyNoteData.description
-            };
-            stickyNote.SetPosition(stickyNoteData.position);
-
-            stickyNote.theme = (StickyNoteTheme)stickyNoteData.theme;
-            stickyNote.fontSize = (StickyNoteFontSize)stickyNoteData.fontSize;
-            AddElement(stickyNote);
-
-            _stickyNotesMap[stickyNote] = stickyNoteData;
-
-
-            HookStickyNoteEvents(stickyNote);
-        }
-
     }
 
     public void UnsubscribeGraphChange() => graphViewChanged -= OnGraphChanged;
@@ -1038,41 +769,10 @@ public sealed partial class StoryGraphView : GraphView
 
 
 
-                    if (_storyGraph.groups != null)
-                    {
-                        string guid = nodeView.storyNode.guid;
-                        foreach (var g in _storyGraph.groups)
-                            g.nodeGuids?.Remove(guid);
-                    }
-
-
                     _temporaryNodes.Remove(nodeView.storyNode);
                     dataChanged = true;
                 }
 
-                if (elem is Group group)
-                {
-                    // 1) вытаскиваем связанную модель
-                    if (_groupMap.TryGetValue(group, out var groupData) && groupData != null)
-                    {
-                        // 2) удаляем из ScriptableObject
-                        _storyGraph.groups.Remove(groupData);
-                        // 3) чистим из словаря
-                        _groupMap.Remove(group);
-                    }
-                }
-
-                if (elem is StickyNote stickyNote)
-                {
-                    // 1) вытаскиваем связанную модель
-                    if (_stickyNotesMap.TryGetValue(stickyNote, out var stickyNoteData) && stickyNoteData != null)
-                    {
-                        // 2) удаляем из ScriptableObject
-                        _storyGraph.stickyNoteDatas.Remove(stickyNoteData);
-                        // 3) чистим из словаря
-                        _stickyNotesMap.Remove(stickyNote);
-                    }
-                }
 
 
                 if (elem is Edge edge)
@@ -1111,15 +811,6 @@ public sealed partial class StoryGraphView : GraphView
 
                     EditorUtility.SetDirty(nodeView.storyNode);
                 }
-                if (element is Group group && _groupMap.TryGetValue(group, out var data) && data != null)
-                {
-                    data.position = group.GetPosition();
-                }
-                if (element is StickyNote stickyNote && _stickyNotesMap.TryGetValue(stickyNote, out var stickyNoteData) && stickyNoteData != null)
-                {
-                    stickyNoteData.position = stickyNote.GetPosition();
-                }
-
             }
             dataChanged = true;
         }

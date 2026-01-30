@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,8 +10,10 @@ namespace PG.StorySystem.Nodes
         public virtual bool reinitNodeOnStart => true;
 
         [HideInInspector] public bool isVisibleInTemplate;
-        [HideInInspector, System.NonSerialized]
-        public bool isStarted = false, isEnded = false;
+        [HideInInspector]
+        public bool isStarted => state.isStarted; 
+        public bool isEnded => state.isEnded;
+
         [HideInInspector, System.NonSerialized]
         public StoryNode baseNode;
 
@@ -36,9 +39,25 @@ namespace PG.StorySystem.Nodes
         protected BaseGroupNode _groupNode;
         public BaseGroupNode groupNode => _groupNode;
 
-        public void StandardUpdate(StoryGraph storyGraph)
+        protected virtual bool useUpdate => false;
+        protected Coroutine _updateCoroutine;
+
+        [System.NonSerialized]
+        public NodeState state = new NodeState();
+
+        public struct NodeState
         {
-            OnUpdate(storyGraph);
+            public StoryNode storyNode;
+            public bool isStarted;
+            public bool isEnded;
+            public List<NodeState> currentNodes;
+        }
+
+        public NodeState CreateState()
+        {
+            state = new NodeState();
+            state.storyNode = this;
+            return state;
         }
 
         // Метод для переопределения логики перезапуска в потомках, если потребуется
@@ -54,14 +73,14 @@ namespace PG.StorySystem.Nodes
             // Если нода не запущена или уже завершена, запускаем её заново
             if (!isStarted || isEnded)
             {
-                isEnded = false;
-                isStarted = true;
+                state.isEnded = false;
+                state.isStarted = true;
                 started?.Invoke();
 
                 // Добавление ноды в список текущих
-                List<StoryNode> currentNodes = (_groupNode != null) ? _groupNode.currentNodes : storyGraph.currentNodes;
-                if (!currentNodes.Contains(this))
-                    currentNodes.Add(this);
+                List<NodeState> currentNodes = (_groupNode != null) ? _groupNode.state.currentNodes : storyGraph.currentNodes;
+                if (!currentNodes.Contains(state))
+                    currentNodes.Add(state);
 
                 Init(storyGraph);
                 OnStart(storyGraph);
@@ -69,6 +88,10 @@ namespace PG.StorySystem.Nodes
             else if (isStarted && !isEnded)
             {
                 OnNotFirstStart(storyGraph);
+            }
+            if (_updateCoroutine == null && useUpdate)
+            {
+                _updateCoroutine = storyGraph.StartCoroutine(OnUpdate(storyGraph));
             }
         }
 
@@ -86,16 +109,21 @@ namespace PG.StorySystem.Nodes
         {
             if (!isEnded)
             {
-                isEnded = true;
-                isStarted = false;
+                state.isEnded = true;
+                state.isStarted = false;
                 ended?.Invoke();
                 OnEnd(storyGraph);
+                if (_updateCoroutine != null)
+                {
+                    storyGraph.StopCoroutine(_updateCoroutine);
+                    _updateCoroutine = null;
+                }
 
                 // Удаляем ноду из списка текущих
-                var list = _groupNode != null ? _groupNode.currentNodes : storyGraph.currentNodes;
-                if (list.Contains(this))
+                var list = _groupNode != null ? _groupNode.state.currentNodes : storyGraph.currentNodes;
+                if (list.Contains(state))
                 {
-                    list.Remove(this);
+                    list.Remove(state);
                 }
             }
         }
@@ -134,7 +162,11 @@ namespace PG.StorySystem.Nodes
         }
 
         protected abstract void OnStart(StoryGraph storyGraph);
-        protected abstract void OnEnd(StoryGraph storyGraph);
-        protected abstract void OnUpdate(StoryGraph storyGraph);
+        protected virtual void OnEnd(StoryGraph storyGraph) { }
+        protected virtual IEnumerator OnUpdate(StoryGraph storyGraph) 
+        {
+            yield break;
+        }
+
     }
 }

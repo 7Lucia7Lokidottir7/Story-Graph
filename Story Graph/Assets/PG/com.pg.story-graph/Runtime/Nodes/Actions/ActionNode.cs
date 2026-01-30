@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace PG.StorySystem.Nodes
@@ -10,7 +11,7 @@ namespace PG.StorySystem.Nodes
         [StoryGraphDropdown("objects")]
         public string objectNameID;
         public override Color colorNode => Color.darkRed;
-        protected override void OnUpdate(StoryGraph storyGraph)
+        protected override void OnStart(StoryGraph storyGraph)
         {
             TransitionToNextNodes(storyGraph);
         }

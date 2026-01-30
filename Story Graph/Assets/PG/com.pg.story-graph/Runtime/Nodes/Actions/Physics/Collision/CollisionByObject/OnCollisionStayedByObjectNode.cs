@@ -12,8 +12,5 @@ namespace PG.StorySystem.Nodes
         {
             _objectElement.onCollisionStayed += CheckCollision;
         }
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-        }
     }
 }

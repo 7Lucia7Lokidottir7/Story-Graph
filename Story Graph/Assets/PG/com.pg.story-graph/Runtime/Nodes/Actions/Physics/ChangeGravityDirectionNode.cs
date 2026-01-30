@@ -12,9 +12,6 @@ namespace PG.StorySystem.Nodes
         {
             Physics.gravity = _gravityDirection;
         }
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
 
     }
 }

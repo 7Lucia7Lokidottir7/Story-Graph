@@ -295,10 +295,6 @@ namespace PG.StorySystem.NodesEditor
 
 
         public List<string> objects => StoryGraphEditorWindow.storyGraph.objects;
-        public List<string> variables => StoryGraphEditorWindow
-          .storyGraph
-          .variables
-          .Select(v => v.variableName).ToList();
         public void ObjectsPopup(ref int data, StoryNode storyNode)
         {
             data = EditorGUILayout.Popup(data, objects.ToArray());

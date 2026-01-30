@@ -7,17 +7,10 @@ namespace PG.StorySystem.Nodes
     {
         [SerializeField] protected string _filename = "Graph.json";
         [HideInInspector] public SaveGraph saveGraph = new SaveGraph();
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
 
         protected override void OnStart(StoryGraph storyGraph)
         {
             TransitionToNextNodes(storyGraph);
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
 
         [System.Serializable]

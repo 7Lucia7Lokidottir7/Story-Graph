@@ -14,12 +14,5 @@ namespace PG.StorySystem
             port.portColor = color;
             return port;
         }
-        public static Port CreateHorizontalPort(Node node, string portName, Direction direction, Port.Capacity capacity, Color color)
-        {
-            var port = node.InstantiatePort(Orientation.Horizontal, direction, capacity, typeof(PropertyNode));
-            port.portName = portName;
-            port.portColor = color;
-            return port;
-        }
     }
 }

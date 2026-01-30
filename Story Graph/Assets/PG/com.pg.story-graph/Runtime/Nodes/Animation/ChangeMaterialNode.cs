@@ -7,11 +7,6 @@ namespace PG.StorySystem.Nodes
         [SerializeField] private Material _material;
         [SerializeField] private int _materialIndex;
         private Renderer _renderer;
-
-        
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
         protected override void Init(StoryGraph storyGraph)
         {
 

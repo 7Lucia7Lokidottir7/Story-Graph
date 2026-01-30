@@ -5,10 +5,6 @@ namespace PG.StorySystem.Nodes
     {
         private Transform _transform;
         private Transform _transformParent;
-
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _transform);
@@ -21,10 +17,6 @@ namespace PG.StorySystem.Nodes
                 _transform.parent = _transformParent;
             }
             TransitionToNextNodes(storyGraph);
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
     }
 }

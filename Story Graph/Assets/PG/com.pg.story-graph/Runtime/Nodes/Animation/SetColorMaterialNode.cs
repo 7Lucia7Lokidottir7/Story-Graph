@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 namespace PG.StorySystem.Nodes
 {
@@ -11,11 +12,7 @@ namespace PG.StorySystem.Nodes
         [HideInInspector] public bool useLerp;
         [HideInInspector] public float duration;
 
-        private float _startTime;
-
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
+        protected override bool useUpdate => true;
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _renderer);
@@ -25,7 +22,6 @@ namespace PG.StorySystem.Nodes
         {
 
             _startColor = _material.color;  // Сохраняем начальный цвет
-            _startTime = Time.time;
 
             if (!useLerp)
             {
@@ -34,23 +30,28 @@ namespace PG.StorySystem.Nodes
             }
         }
 
-        protected override void OnUpdate(StoryGraph storyGraph)
+        protected override IEnumerator OnUpdate(StoryGraph storyGraph)
         {
-            if (useLerp)
+            float time = Time.time;
+            while (true)
             {
-                float elapsedTime = Time.time - _startTime;
+                if (useLerp)
+                {
+                    float elapsedTime = Time.time - time;
 
-                if (elapsedTime < duration)
-                {
-                    // Lerp от _startColor к colorValue
-                    _material.color = Color.Lerp(_startColor, colorValue, elapsedTime / duration);
+                    if (elapsedTime < duration)
+                    {
+                        // Lerp от _startColor к colorValue
+                        _material.color = Color.Lerp(_startColor, colorValue, elapsedTime / duration);
+                    }
+                    else
+                    {
+                        // Устанавливаем окончательный цвет и переходим к следующему узлу
+                        _material.color = colorValue;
+                        TransitionToNextNodes(storyGraph);
+                    }
                 }
-                else
-                {
-                    // Устанавливаем окончательный цвет и переходим к следующему узлу
-                    _material.color = colorValue;
-                    TransitionToNextNodes(storyGraph);
-                }
+                yield return null;
             }
         }
     }

@@ -69,8 +69,6 @@ namespace PG.StorySystem.Nodes
     public class {fileName} : {parentType}
     {{
         protected override void OnStart(StoryGraph storyGraph) {{}}
-        protected override void OnEnd(StoryGraph storyGraph) {{}}
-        protected override void OnUpdate(StoryGraph storyGraph) {{}}
     }}
 }}
 ";

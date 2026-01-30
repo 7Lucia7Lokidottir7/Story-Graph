@@ -1,10 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 namespace PG.StorySystem.Nodes
 {
     public class NavigateToDynamicPointNode : NavigationNode
     {
         private Transform _point;
         [SerializeField] private float _targetDistance = 2f;
+        protected override bool useUpdate => true;
         protected override void Init(StoryGraph storyGraph)
         {
             base.Init(storyGraph);
@@ -14,13 +16,14 @@ namespace PG.StorySystem.Nodes
         {
             _agent.ResetPath();
         }
-        protected override void OnUpdate(StoryGraph storyGraph)
+        protected override IEnumerator OnUpdate(StoryGraph storyGraph)
         {
-            _agent.destination = _point.position;
-            if (_agent.remainingDistance < _targetDistance)
+            while (_agent.remainingDistance > _targetDistance)
             {
-                TransitionToNextNodes(storyGraph);
+                _agent.destination = _point.position;
+                yield return null;
             }
+            TransitionToNextNodes(storyGraph);
         }
         protected override void OnStart(StoryGraph storyGraph)
         {

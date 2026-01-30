@@ -1,11 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 namespace PG.StorySystem.Nodes
 {
     public class NavigateToPointNode : NavigationNode
     {
         private Transform _point;
         [SerializeField] private float _targetDistance = 2f;
-        private Vector3 _targetPosition;
+        protected override bool useUpdate => true;
         protected override void Init(StoryGraph storyGraph)
         {
             base.Init(storyGraph);
@@ -15,17 +16,22 @@ namespace PG.StorySystem.Nodes
         {
             _agent.ResetPath();
         }
-        protected override void OnUpdate(StoryGraph storyGraph)
+        protected override IEnumerator OnUpdate(StoryGraph storyGraph)
         {
-            if (_agent.remainingDistance < _targetDistance)
+            Vector3 targetPosition;
+            targetPosition = _point.position;
+            _agent.destination = targetPosition;
+            while (true)
             {
-                TransitionToNextNodes(storyGraph);
+                if (_agent.remainingDistance < _targetDistance)
+                {
+                    TransitionToNextNodes(storyGraph);
+                }
+                yield return null;
             }
         }
         protected override void OnStart(StoryGraph storyGraph)
         {
-            _targetPosition = _point.position;
-            _agent.destination = _targetPosition;
         }
     }
 }

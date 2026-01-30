@@ -7,9 +7,6 @@ namespace PG.StorySystem.Nodes
     {
         private StoryUnityEventContainer _unityEventContainer;
         [SerializeField] private string _nameEvent;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _unityEventContainer);
@@ -19,10 +16,6 @@ namespace PG.StorySystem.Nodes
             _unityEventContainer.events.TryGetValue(_nameEvent, out UnityEvent unityEvent);
             unityEvent?.Invoke();
             TransitionToNextNodes(storyGraph);
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
 
     }

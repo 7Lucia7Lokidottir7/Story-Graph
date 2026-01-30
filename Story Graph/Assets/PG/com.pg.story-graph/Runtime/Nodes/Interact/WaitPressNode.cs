@@ -28,10 +28,6 @@ namespace PG.StorySystem.Nodes
         {
             _action.performed += OnPress;
         }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-        }
         void OnPress(InputAction.CallbackContext context)
         {
             if (_actions.Length > 0)

@@ -6,10 +6,6 @@ namespace PG.StorySystem.Nodes
     {
         [SerializeField] private string[] _targetNameNodes;
 
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-            // Этот узел не требует логики обновления
-        }
 
         protected override void OnStart(StoryGraph storyGraph)
         {

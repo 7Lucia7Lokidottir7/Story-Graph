@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 namespace PG.StorySystem.Nodes
@@ -13,7 +14,7 @@ namespace PG.StorySystem.Nodes
         [HideInInspector] public int intValue;
         [HideInInspector] public bool boolValue;
         [SerializeField] private bool _waitEndAnimation;
-        private int _currentStateHash;
+        protected override bool useUpdate => true;
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _animator);
@@ -44,24 +45,24 @@ namespace PG.StorySystem.Nodes
                 }
                 // Сохраняем хэш текущего состояния
                 AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
-                _currentStateHash = stateInfo.fullPathHash;
             }
         }
-        protected override void OnEnd(StoryGraph storyGraph)
+        protected override IEnumerator OnUpdate(StoryGraph storyGraph)
         {
-        }
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
-            if (_animator != null)
+            while (true)
             {
-                AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
-
-
-                // Если анимация завершилась и не зациклена
-                if (_waitEndAnimation && stateInfo.normalizedTime >= 1f)
+                if (_animator != null)
                 {
-                    TransitionToNextNodes(storyGraph);
+                    AnimatorStateInfo stateInfo = _animator.GetCurrentAnimatorStateInfo(0);
+
+
+                    // Если анимация завершилась и не зациклена
+                    if (_waitEndAnimation && stateInfo.normalizedTime >= 1f)
+                    {
+                        TransitionToNextNodes(storyGraph);
+                    }
                 }
+                yield return null;
             }
         }
 

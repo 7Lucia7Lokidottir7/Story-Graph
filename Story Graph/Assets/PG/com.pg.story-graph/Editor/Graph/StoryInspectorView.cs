@@ -30,45 +30,43 @@ public sealed partial class StoryInspectorView : VisualElement
     {
         Clear();
 
-        if (StoryGraphEditorWindow.dataDropdown.index == 0)
+        switch (StoryGraphEditorWindow.dataDropdown.index)
         {
-            // Панель, соответствующая первому значению дропдауна
-            IMGUIContainer container = new IMGUIContainer(() =>
-            {
-            });
-            Add(container);
-            if (_editor != null)
-            {
-                Add(_editor.CreateInspectorGUI());
-            }
-        }
-        else if (StoryGraphEditorWindow.dataDropdown.index == 1)
-        {
+            default:
+                RenderInspector();
+                break;
+            case 0:
+                RenderInspector();
+                break;
+            case 1:
 
-            if (_objectTreeAsset == null)
-            {
-                _objectTreeAsset = Resources.Load("StoryGraph/ObjectElementGUI") as VisualTreeAsset;
-            }
+                if (_objectTreeAsset == null)
+                {
+                    _objectTreeAsset = Resources.Load("StoryGraph/ObjectElementGUI") as VisualTreeAsset;
+                }
 
-            Button addButton = new Button();
-            addButton.text = "+";
-            addButton.clicked += () => AddObject(storyGraph);
-            Add(addButton);
-            RenderObjectList(storyGraph);
-            Add(_objectsContainer);
-        }
-        else if (StoryGraphEditorWindow.dataDropdown.index == 2)
-        {
-
-            _variablesContainer = Resources.Load("StoryGraph/Variable/VariablesPanel") as VisualTreeAsset;
-            VisualElement variablePanel = _variablesContainer.CloneTree();
-            OnVariablesPanel(storyGraph, variablePanel);
-            Add(variablePanel);
-
+                Button addButton = new Button();
+                addButton.text = "+";
+                addButton.clicked += () => AddObject(storyGraph);
+                Add(addButton);
+                RenderObjectList(storyGraph);
+                Add(_objectsContainer);
+                break;
         }
     }
 
-
+    void RenderInspector()
+    {
+        // Панель, соответствующая первому значению дропдауна
+        IMGUIContainer container = new IMGUIContainer(() =>
+        {
+        });
+        Add(container);
+        if (_editor != null)
+        {
+            Add(_editor.CreateInspectorGUI());
+        }
+    }
     void AddObject(StoryGraph storyGraph)
     {
         storyGraph.objects.Add("");
@@ -118,86 +116,6 @@ public sealed partial class StoryInspectorView : VisualElement
         }
     }
 
-    void AddVariable(StoryGraph storyGraph, StoryVariable variable)
-    {
-
-        Undo.RecordObject(storyGraph, variable.GetUndoText());
-        storyGraph.variables.Add(variable);
-
-        AssetDatabase.AddObjectToAsset(variable, storyGraph);
-        Undo.RegisterCreatedObjectUndo(variable, variable.GetUndoText());
-
-        
-    }
-    void RemoveVariable(int index, StoryGraph storyGraph)
-    {
-        if (index >= 0 && index < storyGraph.variables.Count)
-        {
-            Undo.RecordObject(storyGraph, "Story Graph (Delete Variable)");
-            StoryVariable scenarioVariable = storyGraph.variables[index];
-            storyGraph.variables.RemoveAt(index);
-
-            Undo.DestroyObjectImmediate(scenarioVariable);
-            
-        }
-    }
-
-    void OnVariablesPanel(StoryGraph storyGraph, VisualElement variablePanel)
-    {
-        CreateVaribale(storyGraph, variablePanel);
-        RenderVariables(storyGraph, variablePanel.Q<VisualElement>("Container"));
-
-    }
-    void RenderVariables(StoryGraph storyGraph, VisualElement variablePanel)
-    {
-        variablePanel.Clear();  // Очищаем контейнер перед перерисовкой
-        if (storyGraph.variables.Count > 0)
-        {
-            for (int i = 0; i < storyGraph.variables.Count; i++)
-            {
-                int index = i; // Локальная копия индекса для использования в лямбде
-
-                Editor editor = Editor.CreateEditor(storyGraph.variables[i]);
-
-                VisualElement variableElement = editor.CreateInspectorGUI();
-
-                variablePanel.Add(variableElement);
-
-                Button removeButton = variableElement.Q<Button>();
-                removeButton.clicked += () => { 
-                    RemoveVariable(index, storyGraph);
-                    OnVariablesPanel(storyGraph, variablePanel);
-                };
-
-            }
-        }
-    }
-
-    private void CreateVaribale(StoryGraph storyGraph, VisualElement variablePanel)
-    {
-        Foldout createFoldout = variablePanel.Q<Foldout>("CreateFoldout");
-        createFoldout.RegisterValueChangedCallback(evt =>
-        {
-            if (evt.newValue)
-            {
-                createFoldout.Clear();
-                var types = TypeCache.GetTypesDerivedFrom<StoryVariable>();
-                foreach (var type in types)
-                {
-                    Button button = new Button();
-                    StoryVariable variable = ScriptableObject.CreateInstance(type) as StoryVariable;
-                    button.text = variable.GetTypeName();
-                    button.clicked += () =>
-                    {
-                        AddVariable(storyGraph, variable);
-                        createFoldout.value = false;
-                        OnVariablesPanel(storyGraph, variablePanel);
-                    };
-                    createFoldout.Add(button);
-                }
-            }
-        });
-    }
 
 
     private Editor _editor;

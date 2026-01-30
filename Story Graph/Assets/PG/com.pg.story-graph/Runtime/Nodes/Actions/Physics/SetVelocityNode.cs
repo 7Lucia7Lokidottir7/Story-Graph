@@ -15,9 +15,6 @@ namespace PG.StorySystem.Nodes
             base.Init(storyGraph);
             storyGraph.GetObject(targetObjectNameID, out _targetObject);
         }
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
 
         protected override void OnStart(StoryGraph storyGraph)
         {
@@ -27,9 +24,6 @@ namespace PG.StorySystem.Nodes
             }
             _rigidbody.linearVelocity = velocity;
             TransitionToNextNodes(storyGraph);
-        }
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
     }
 }

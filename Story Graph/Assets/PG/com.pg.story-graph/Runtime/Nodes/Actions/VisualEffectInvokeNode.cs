@@ -7,9 +7,6 @@ namespace PG.StorySystem.Nodes
     {
         private VFXInvoker _vfxInvoker;
         [SerializeField] private string _nameParticleSystem;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _vfxInvoker);
@@ -19,10 +16,6 @@ namespace PG.StorySystem.Nodes
             _vfxInvoker.visualEffects.TryGetValue(_nameParticleSystem, out VisualEffect visualEffect);
             visualEffect?.Play();
             TransitionToNextNodes(storyGraph);
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
     }
 }

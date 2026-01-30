@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using PG.StorySystem.Nodes;
+using System.Collections;
 namespace PG.StorySystem
 {
     public class CheckPlayerDistanceNode : ActionNode
@@ -15,10 +16,6 @@ namespace PG.StorySystem
 
         [NodeDataTitle]
         [SerializeField] private float _targetDistance;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-
-        }
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _transform);
@@ -29,8 +26,9 @@ namespace PG.StorySystem
         {
             
         }
-        protected override void OnUpdate(StoryGraph storyGraph)
+        protected override IEnumerator OnUpdate(StoryGraph storyGraph)
         {
+            yield return new WaitForEndOfFrame();
             if (_characterController != null && _transform != null)
             {
                 switch (_checkType)

@@ -7,9 +7,6 @@ namespace PG.StorySystem.Nodes
         private ParticlesInvoker _particlesInvoker;
         [SerializeField] private string _nameParticleSystem;
         [SerializeField] private bool _clearParticles;
-        protected override void OnEnd(StoryGraph storyGraph)
-        {
-        }
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _particlesInvoker);
@@ -26,10 +23,6 @@ namespace PG.StorySystem.Nodes
                 particleSystem?.Stop(true, ParticleSystemStopBehavior.StopEmitting);
             }
             TransitionToNextNodes(storyGraph);
-        }
-
-        protected override void OnUpdate(StoryGraph storyGraph)
-        {
         }
     }
 }

@@ -7,7 +7,7 @@ namespace PG.StorySystem.Nodes
 
         [SerializeField] private float _duration = 1f;
         public float duration => _duration;
-        protected override IEnumerator Delay(StoryGraph storyGraph)
+        protected override IEnumerator OnUpdate(StoryGraph storyGraph)
         {
             yield return new WaitForSecondsRealtime(_duration);
             TransitionToNextNodes(storyGraph);
