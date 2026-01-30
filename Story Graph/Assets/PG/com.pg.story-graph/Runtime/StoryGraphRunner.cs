@@ -51,7 +51,6 @@ namespace PG.StorySystem
             if (_storyGraph)
             {
                 InitializeObjects();
-                _storyGraph = Instantiate(_storyGraph);
                 _storyGraph.runner = this;
 
                 _storyGraph.Initialize();

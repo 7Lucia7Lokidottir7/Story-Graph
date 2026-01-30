@@ -63,6 +63,7 @@ namespace PG.StorySystem
         }
         public void Initialize()
         {
+            currentNodes.Clear();
             currentNodes.Add(rootNode.CreateState());
             rootNode.StartNode(this);
         }
