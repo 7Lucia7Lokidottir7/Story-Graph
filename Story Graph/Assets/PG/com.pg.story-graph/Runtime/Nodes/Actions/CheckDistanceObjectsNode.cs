@@ -28,24 +28,27 @@ namespace PG.StorySystem
         }
         protected override IEnumerator OnUpdate(StoryGraph storyGraph)
         {
-            yield return new WaitForEndOfFrame();
-            if (_targetTransform != null && _transform != null)
+            while (true)
             {
-                switch (_checkType)
+                if (_targetTransform != null && _transform != null)
                 {
-                    case CheckType.Less:
-                        if (Vector3.Distance(_transform.position, _targetTransform.position) < _targetDistance)
-                        {
-                            TransitionToNextNodes(storyGraph);
-                        }
-                        break;
-                    case CheckType.Greater:
-                        if (Vector3.Distance(_transform.position, _targetTransform.position) > _targetDistance)
-                        {
-                            TransitionToNextNodes(storyGraph);
-                        }
-                        break;
+                    switch (_checkType)
+                    {
+                        case CheckType.Less:
+                            if (Vector3.Distance(_transform.position, _targetTransform.position) < _targetDistance)
+                            {
+                                TransitionToNextNodes(storyGraph);
+                            }
+                            break;
+                        case CheckType.Greater:
+                            if (Vector3.Distance(_transform.position, _targetTransform.position) > _targetDistance)
+                            {
+                                TransitionToNextNodes(storyGraph);
+                            }
+                            break;
+                    }
                 }
+                yield return null;
             }
         }
     }

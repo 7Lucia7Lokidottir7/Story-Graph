@@ -14,10 +14,5 @@ namespace PG.StorySystem.Nodes
             }
             TransitionToNextNodes(storyGraph);
         }
-
-        protected override IEnumerator OnUpdate(StoryGraph storyGraph)
-        {
-            yield return null;
-        }
     }
 }
