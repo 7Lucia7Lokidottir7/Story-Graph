@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace PG.StorySystem.Nodes
@@ -23,18 +22,18 @@ namespace PG.StorySystem.Nodes
             base.RestartNode(storyGraph);
             if (rootNode != null)
             {
-                rootNode.state = new NodeState();
+                // При рестарте создаем новое состояние
+                rootNode.state = new StoryNode.NodeState();
+                rootNode.state.storyNode = rootNode; // Не забываем привязать ноду
             }
         }
+
         protected override void OnStart(StoryGraph storyGraph)
         {
             if (rootNode != null)
             {
-                rootNode = Instantiate(rootNode);
                 rootNode.StartNode(storyGraph, this);
-                state.currentNodes.Add(rootNode.state);
             }
-
         }
         public void EndGroup(StoryGraph storyGraph)
         {

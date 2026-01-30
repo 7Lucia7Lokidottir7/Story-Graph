@@ -45,12 +45,15 @@ namespace PG.StorySystem.Nodes
         [System.NonSerialized]
         public NodeState state = new NodeState();
 
-        public struct NodeState
+        [System.Serializable]
+        public class NodeState
         {
             public StoryNode storyNode;
             public bool isStarted;
             public bool isEnded;
-            public List<NodeState> currentNodes;
+            // Инициализируем список сразу, чтобы избежать NullReference
+            [System.NonSerialized]
+            public List<NodeState> currentNodes = new List<NodeState>();
         }
 
         public NodeState CreateState()
@@ -75,10 +78,16 @@ namespace PG.StorySystem.Nodes
             {
                 state.isEnded = false;
                 state.isStarted = true;
+
+                // Важно: привязываем ссылку на саму ноду к состоянию, если она потерялась
+                if (state.storyNode == null) state.storyNode = this;
+
                 started?.Invoke();
 
                 // Добавление ноды в список текущих
                 List<NodeState> currentNodes = (_groupNode != null) ? _groupNode.state.currentNodes : storyGraph.currentNodes;
+
+                // ИЗМЕНЕНИЕ 2: Так как это теперь class, проверка Contains работает по ссылке корректно
                 if (!currentNodes.Contains(state))
                     currentNodes.Add(state);
 
@@ -121,6 +130,8 @@ namespace PG.StorySystem.Nodes
 
                 // Удаляем ноду из списка текущих
                 var list = _groupNode != null ? _groupNode.state.currentNodes : storyGraph.currentNodes;
+
+                // Теперь Remove удалит именно этот экземпляр класса
                 if (list.Contains(state))
                 {
                     list.Remove(state);
