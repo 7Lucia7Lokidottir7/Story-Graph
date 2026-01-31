@@ -14,6 +14,7 @@ namespace PG.StorySystem.Nodes
         public bool useMovement = true;
         public bool useRotation;
         public bool useScale;
+        protected override bool useUpdate => true;
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _transform);

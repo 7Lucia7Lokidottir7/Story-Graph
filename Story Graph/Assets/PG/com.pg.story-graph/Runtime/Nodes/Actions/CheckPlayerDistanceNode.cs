@@ -16,6 +16,7 @@ namespace PG.StorySystem
 
         [NodeDataTitle]
         [SerializeField] private float _targetDistance;
+        protected override bool useUpdate => true;
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _transform);

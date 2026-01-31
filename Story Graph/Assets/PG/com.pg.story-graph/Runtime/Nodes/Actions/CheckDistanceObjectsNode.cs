@@ -18,6 +18,7 @@ namespace PG.StorySystem
         }
         [SerializeField] private CheckType _checkType;
         [SerializeField] private float _targetDistance;
+        protected override bool useUpdate => true;
         protected override void Init(StoryGraph storyGraph)
         {
             storyGraph.GetObject(objectNameID, out _transform);
