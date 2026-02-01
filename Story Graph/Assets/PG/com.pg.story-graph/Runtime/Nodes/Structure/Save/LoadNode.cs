@@ -11,13 +11,9 @@ namespace PG.StorySystem.Nodes
 
             if (File.Exists(path))
             {
-                for (int i = 0; i < storyGraph.currentNodes.Count; i++)
-                {
-                    saveGraph.nodes.Add(storyGraph.currentNodes[i].storyNode.id);
-                }
-
                 string json = File.ReadAllText(path);
                 JsonUtility.FromJsonOverwrite(json, saveGraph);
+
 
                 for (int i = 0; i < storyGraph.currentNodes.Count; i++)
                 {
@@ -27,11 +23,22 @@ namespace PG.StorySystem.Nodes
                 for (int i = 0; i < saveGraph.nodes.Count; i++)
                 {
                     StoryNode storyNode = storyGraph.FindNode(saveGraph.nodes[i]);
-                    storyNode.StartNode(storyGraph, storyNode.groupNode);
+                    if (storyNode is SaveNode saveNode)
+                    {
+                        saveNode.TransitionToNextNodes(storyGraph);
+                    }
+                    else
+                    {
+                        storyNode.StartNode(storyGraph, storyNode.groupNode);
+                    }
                 }
+                EndNode(storyGraph);
+            }
+            else
+            {
+                base.OnStart(storyGraph);
             }
 
-            base.OnStart(storyGraph);
         }
     }
 }
