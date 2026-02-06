@@ -17,15 +17,22 @@ namespace PG.StorySystem
         internal Dictionary<string, GameObject> gameObjects = new Dictionary<string, GameObject>();
 
         [SerializeField] private bool _isStartGraphOnAwake = true;
-        ObjectElement[] objectElements;
+        [SerializeField] private bool _useReinitObjectsWithSceneLoading = true;
+        private ObjectElement[] _objectElements;
         private void Awake()
         {
             _storyGraph = baseStoryGraph;
-            SceneManager.sceneLoaded += OnSceneLoaded;
+            if (_useReinitObjectsWithSceneLoading)
+            {
+                SceneManager.sceneLoaded += OnSceneLoaded;
+            }
         }
         private void OnDestroy()
         {
-            SceneManager.sceneLoaded -= OnSceneLoaded;
+            if (_useReinitObjectsWithSceneLoading)
+            {
+                SceneManager.sceneLoaded -= OnSceneLoaded;
+            }
         }
         // Start is called once before the first execution of Update after the MonoBehaviour is created
         void Start()
@@ -58,16 +65,16 @@ namespace PG.StorySystem
         }
 
 
-        private void InitializeObjects()
+        public void InitializeObjects()
         {
-            objectElements = FindObjectsByType<ObjectElement>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID);
+            _objectElements = FindObjectsByType<ObjectElement>(FindObjectsInactive.Include, FindObjectsSortMode.InstanceID);
             gameObjects.Clear();
-            for (int i = 0; i < objectElements.Length; i++)
+            for (int i = 0; i < _objectElements.Length; i++)
             {
-                string key = objectElements[i].objectNameID;
+                string key = _objectElements[i].objectNameID;
                 if (!gameObjects.ContainsKey(key))
                 {
-                    gameObjects.Add(key, objectElements[i].gameObject);
+                    gameObjects.Add(key, _objectElements[i].gameObject);
                 }
                 else
                 {
