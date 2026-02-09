@@ -10,28 +10,23 @@ namespace PG.StorySystem.Nodes
         public virtual bool reinitNodeOnStart => true;
 
         [HideInInspector] public bool isVisibleInTemplate;
-        [HideInInspector]
-        public bool isStarted => state.isStarted; 
-        public bool isEnded => state.isEnded;
+
+        // Безопасная проверка на null, чтобы редактор не падал при выделении ассета
+        public bool isStarted => state != null && state.isStarted;
+        public bool isEnded => state != null && state.isEnded;
 
         [HideInInspector, System.NonSerialized]
         public StoryNode baseNode;
 
-        [HideInInspector]
-        public int id;
-        [HideInInspector]
-        public string guid;
-        [HideInInspector]
-        public Vector2 nodePosition;
-        [HideInInspector]
-        public StoryGraph storyGraph;
+        [HideInInspector] public int id;
+        [HideInInspector] public string guid;
+        [HideInInspector] public Vector2 nodePosition;
+        [HideInInspector] public StoryGraph storyGraph;
 
         public string nameNode;
-        [HideInInspector]
-        public List<int> childrenID = new List<int>();
+        [HideInInspector] public List<int> childrenID = new List<int>();
 
         public event System.Action started, ended;
-
 
         [HideInInspector, TextArea(3, 10)]
         public string description;
@@ -51,19 +46,22 @@ namespace PG.StorySystem.Nodes
             public StoryNode storyNode;
             public bool isStarted;
             public bool isEnded;
-            // Инициализируем список сразу, чтобы избежать NullReference
             [System.NonSerialized]
             public List<NodeState> currentNodes = new List<NodeState>();
         }
 
+        // Исправленный метод: Создает стейт чисто и жестко
         public NodeState CreateState()
         {
             state = new NodeState();
             state.storyNode = this;
+            state.isStarted = false;
+            state.isEnded = false;
+            // Гарантируем, что список инициализирован
+            if (state.currentNodes == null) state.currentNodes = new List<NodeState>();
             return state;
         }
 
-        // Метод для переопределения логики перезапуска в потомках, если потребуется
         public virtual void RestartNode(StoryGraph storyGraph)
         {
         }
@@ -72,25 +70,37 @@ namespace PG.StorySystem.Nodes
         {
             this.storyGraph = storyGraph;
             _groupNode = groupNode;
+
+            // 1. ЖЕСТКИЙ СБРОС КОРУТИНЫ
+            // Если мы загружаемся или перезапускаемся, старая корутина — это яд.
+            // Она может всё ещё пытаться работать со старым (уже затертым) стейтом.
+            if (_updateCoroutine != null)
+            {
+                storyGraph.StopCoroutine(_updateCoroutine);
+                _updateCoroutine = null;
+            }
+
+            // 2. ПЕРЕЗАПИСЬ СТЕЙТА
+            // Теперь CreateState() гарантированно создает новый объект
             state = CreateState();
 
-            // Если нода не запущена или уже завершена, запускаем её заново
+            // 3. ЛОГИКА ЗАПУСКА
             if (!isStarted || isEnded)
             {
                 state.isEnded = false;
                 state.isStarted = true;
 
-                // Важно: привязываем ссылку на саму ноду к состоянию, если она потерялась
                 if (state.storyNode == null) state.storyNode = this;
 
                 started?.Invoke();
 
-                // Добавление ноды в список текущих
-                List<NodeState> currentNodes = (_groupNode != null) ? _groupNode.state.currentNodes : storyGraph.currentNodes;
+                // Определяем список, куда нужно добавить ноду
+                List<NodeState> currentNodesList = (_groupNode != null) ? _groupNode.state.currentNodes : storyGraph.currentNodes;
 
-                // ИЗМЕНЕНИЕ 2: Так как это теперь class, проверка Contains работает по ссылке корректно
-                if (!currentNodes.Contains(state))
-                    currentNodes.Add(state);
+                if (!currentNodesList.Contains(state))
+                {
+                    currentNodesList.Add(state);
+                }
 
                 Init(storyGraph);
                 OnStart(storyGraph);
@@ -99,51 +109,49 @@ namespace PG.StorySystem.Nodes
             {
                 OnNotFirstStart(storyGraph);
             }
+
+            // 4. ГАРАНТИРОВАННЫЙ ЗАПУСК ОБНОВЛЕНИЯ
+            // Теперь, когда мы обнулили корутину в начале метода, это условие сработает железно.
             if (_updateCoroutine == null && useUpdate)
             {
                 _updateCoroutine = storyGraph.StartCoroutine(OnUpdate(storyGraph));
             }
         }
 
-        protected virtual void Init(StoryGraph storyGraph)
-        {
-            // Базовая инициализация ноды
-        }
 
-        protected virtual void OnNotFirstStart(StoryGraph storyGraph)
-        {
-            // Логика, если нода уже запущена и происходит повторный вход
-        }
+        protected virtual void Init(StoryGraph storyGraph) { }
+        protected virtual void OnNotFirstStart(StoryGraph storyGraph) { }
 
         public void EndNode(StoryGraph storyGraph)
         {
             if (!isEnded)
             {
-                state.isEnded = true;
-                state.isStarted = false;
+                // Обязательно проверяем на null перед записью
+                if (state != null)
+                {
+                    state.isEnded = true;
+                    state.isStarted = false;
+                }
+
                 ended?.Invoke();
                 OnEnd(storyGraph);
+
                 if (_updateCoroutine != null)
                 {
                     storyGraph.StopCoroutine(_updateCoroutine);
                     _updateCoroutine = null;
                 }
 
-                // Удаляем ноду из списка текущих
                 var list = _groupNode != null ? _groupNode.state.currentNodes : storyGraph.currentNodes;
 
-                // Теперь Remove удалит именно этот экземпляр класса
-                if (list.Contains(state))
+                if (state != null && list.Contains(state))
                 {
                     list.Remove(state);
                 }
             }
         }
 
-        public virtual void OnDublicate()
-        {
-            childrenID.Clear();
-        }
+        public virtual void OnDublicate() { childrenID.Clear(); }
 
         public virtual void OnDublicateChildren(Dictionary<int, int> idMapping, StoryNode originalNode)
         {
@@ -160,7 +168,6 @@ namespace PG.StorySystem.Nodes
         public virtual void TransitionToNextNodes(StoryGraph storyGraph)
         {
             EndNode(storyGraph);
-
             OnNextNode(storyGraph);
         }
 
@@ -169,16 +176,13 @@ namespace PG.StorySystem.Nodes
             foreach (var childID in childrenID)
             {
                 StoryNode childInstance = storyGraph.GetNodeByID(childID, _groupNode);
-                childInstance.StartNode(storyGraph, _groupNode);
+                if (childInstance != null) // Проверка на null
+                    childInstance.StartNode(storyGraph, _groupNode);
             }
         }
 
         protected abstract void OnStart(StoryGraph storyGraph);
         protected virtual void OnEnd(StoryGraph storyGraph) { }
-        protected virtual IEnumerator OnUpdate(StoryGraph storyGraph) 
-        {
-            yield break;
-        }
-
+        protected virtual IEnumerator OnUpdate(StoryGraph storyGraph) { yield break; }
     }
 }
