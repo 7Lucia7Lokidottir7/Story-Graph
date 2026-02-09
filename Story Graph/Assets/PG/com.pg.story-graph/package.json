@@ -1,11 +1,12 @@
 {
   "name": "com.pg.story-graph",
-  "version": "3.0.6",
+  "version": "3.0.7",
   "displayName": "PG Story Graph",
   "description": "Story Graph. A package for creating games without code. It is an updated replacement for StorySystem. It is recommended to work with Unity 2022, Unity 6 and newer.",
   "unity": "2022.3",
   "type": "plugin",
   "author": {
     "name": "Lucia Lokidottir"
-  }
+  },
+  "_fingerprint": "d86c8237400a0edeeee3175f6a137bfecba931db"
 }

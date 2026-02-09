@@ -9,6 +9,28 @@ namespace PG.StorySystem.Nodes
     {
         [SerializeField] private bool _isAdditiveLoad = true;
         [SerializeField] private bool _setActiveScene = true;
+
+        protected override void OnStart(StoryGraph storyGraph)
+        {
+            // ≈сли мы зашли в OnStart, значит граф хочет выполнить эту ноду.
+            // ƒаже если там висит стара€ ссылка на корутину, она скорее всего от мертвого раннера.
+            // ѕринудительно сбрасываем или останавливаем старую (если раннер тот же) и запускаем новую.
+
+            if (SceneManager.GetSceneByName(_levelName).isLoaded)
+            {
+                TransitionToNextNodes(storyGraph);
+                return;
+            }
+
+            if (_coroutine != null)
+            {
+                // Ќа случай, если вызов дублируетс€ в том же раннере
+                storyGraph.runner.StopCoroutine(_coroutine);
+                _coroutine = null;
+            }
+
+            _coroutine = storyGraph.runner.StartCoroutine(LoadingScene());
+        }
         protected override IEnumerator LoadingScene()
         {
             if (!SceneManager.GetSceneByName(_levelName).isLoaded)

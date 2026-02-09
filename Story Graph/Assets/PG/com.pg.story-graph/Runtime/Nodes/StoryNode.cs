@@ -72,6 +72,7 @@ namespace PG.StorySystem.Nodes
         {
             this.storyGraph = storyGraph;
             _groupNode = groupNode;
+            state = CreateState();
 
             // Если нода не запущена или уже завершена, запускаем её заново
             if (!isStarted || isEnded)
